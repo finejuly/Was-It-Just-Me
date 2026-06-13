@@ -41,6 +41,7 @@ const timeMode = $<HTMLSpanElement>("time-mode");
 const timeReadout = $<HTMLSpanElement>("time-readout");
 const liveBtn = $<HTMLButtonElement>("live-btn");
 const noticeBtn = $<HTMLButtonElement>("notice-btn");
+const useLocationBtn = $<HTMLButtonElement>("use-location-btn");
 const confirmEl = $<HTMLDivElement>("confirm");
 const demoToggle = $<HTMLInputElement>("demo-toggle");
 const heatmapToggle = $<HTMLInputElement>("heatmap-toggle");
@@ -320,27 +321,37 @@ function sendSignal(): void {
   showConfirm(
     realFix
       ? "Thanks — your signal joined the others nearby."
-      : "Thanks — added near the demo area (location unavailable).",
+      : "Thanks — added to the demo neighborhood.",
   );
 }
 
 // --- Real geolocation (UI layer only) ------------------------------------
-// On boot, try once to learn the user's real location so the map centers on
-// them and their sent signals come from their true area (privacy still applied).
-// Failure is non-fatal: we keep the demo center and surface a calm message.
-async function initRealLocation(): Promise<void> {
+// Gesture-driven ONLY: this runs from a user click on "Use my location", never
+// on boot. Requiring a gesture is the actual fix for browsers (Safari/iOS,
+// insecure contexts) that silently deny or never prompt for an un-gestured
+// getCurrentPosition. On success we center the map on the user's area (the dot
+// they later send is still privacy-transformed); failure is non-fatal and the
+// demo neighborhood stays as the deliberate default with a calm, branded note.
+// Raw coords briefly live in `realFix` in-memory and are never persisted; the
+// send path routes them through transformSignal exactly like every other point.
+async function useMyLocation(): Promise<void> {
   try {
     const fix = await getCurrentPosition();
     realFix = fix;
     mapView.recenter(fix.coords.lat, fix.coords.lng);
     // If verification mode was switched on before the fix resolved, plot it now.
     if (verifyToggle.checked) plotExactFix(fix);
-  } catch (err) {
-    const message =
-      typeof err === "object" && err !== null && "message" in err
-        ? String((err as { message: unknown }).message)
-        : "Could not access your location.";
-    showConfirm(`${message} Showing the demo area instead.`);
+    // The button has done its job; hide it so the chrome stays calm and uncluttered.
+    useLocationBtn.hidden = true;
+    showConfirm(
+      "Centered on your area — your signals stay blurred to your neighborhood.",
+    );
+  } catch {
+    // Deliberately do NOT surface the raw GeoError (no "denied"/"permission"
+    // language): the demo neighborhood is a first-class default, not a failure.
+    showConfirm(
+      "No problem — staying on the demo neighborhood. You can use your location anytime.",
+    );
   }
 }
 
@@ -403,6 +414,13 @@ speedSelect.addEventListener("change", () => {
 });
 
 noticeBtn.addEventListener("click", sendSignal);
+
+// The click IS the user gesture browsers require before prompting for location —
+// this is the real fix for the silent boot-time denial. No privacy path changes:
+// sendSignal still routes any resulting realFix through transformSignal.
+useLocationBtn.addEventListener("click", () => {
+  void useMyLocation();
+});
 
 // --- Native shell bridge (Tauri only; no-op in the browser) --------------
 // When this same web app runs inside the Tauri desktop shell (src-tauri/), the
@@ -473,5 +491,7 @@ setPlayLabel();
 playbackRow.hidden = !demoToggle.checked;
 mapView.setShowDensity(heatmapToggle.checked);
 loadDemo();
-// Try to center on the user's real location (non-blocking; demo shows meanwhile).
-void initRealLocation();
+// No boot-time geolocation request: the demo neighborhood is the deliberate
+// default and the app is fully functional on it. Real location is opt-in via the
+// gesture-driven "Use my location" button (the gesture is what lets browsers
+// actually prompt rather than silently deny an un-gestured boot request).

@@ -22,6 +22,12 @@
           <p class="tagline">See whether anyone nearby noticed something too.</p>
         </div>
         <div class="controls">
+          <!-- Opt-in real location. Requesting geolocation on this CLICK (a user
+               gesture) is what lets browsers actually prompt; the boot path no
+               longer requests location, so there is no scary denial on load. -->
+          <button type="button" id="use-location-btn" class="ghost-btn use-location-btn">
+            📍 Use my location
+          </button>
           <label class="toggle">
             <input type="checkbox" id="demo-toggle" checked />
             <span>Demo mode</span>
@@ -112,7 +118,9 @@
 
       <p class="reassure" id="reassure">
         These dots are deliberately blurred — they show that people nearby noticed
-        something, never where anyone is or what happened.
+        something, never where anyone is or what happened. By default we show a
+        demo neighborhood — tap “Use my location” to center on your area
+        (still blurred).
       </p>
     </div>
 

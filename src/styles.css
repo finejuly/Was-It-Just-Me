@@ -213,6 +213,17 @@ body {
   display: none;
 }
 
+/* Opt-in "Use my location" — reuses the calm teal ghost-btn pill so it matches
+   the brand (no red, no alarm). Hidden after a successful fix. -------------- */
+.use-location-btn {
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.use-location-btn[hidden] {
+  display: none;
+}
+
 #scrubber {
   width: 100%;
   accent-color: var(--accent);
