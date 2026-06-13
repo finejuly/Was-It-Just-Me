@@ -65,3 +65,12 @@ publish step that has to be your decision.
 Approve this issue (note which option) — or paste any error from the commands and the
 loop will fix it fast. The live demo spine remains http://localhost:5173/ locally
 regardless.
+
+
+# Response
+
+Before push it, change the default git name and email for all the commit to:
+name: Il-Young Jeong
+email: finejuly@gmail.com
+
+Then push it to https://github.com/finejuly/Was-It-Just-Me
