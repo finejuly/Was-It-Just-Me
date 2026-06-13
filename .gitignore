@@ -4,3 +4,8 @@
 node_modules/
 dist/
 *.log
+
+# Swift / native sender (SwiftPM build output)
+native/**/.build/
+native/**/*.xcodeproj
+.swiftpm/

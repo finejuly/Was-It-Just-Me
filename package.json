@@ -9,6 +9,7 @@
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
+    "build:core": "esbuild src/core/bridge.ts --bundle --format=iife --global-name=WIJM --platform=neutral --target=es2020 --outfile=native/WIJMCore/Sources/WIJMCore/Resources/wijm-core.js",
     "test": "node --test 'src/**/*.test.ts'"
   },
   "devDependencies": {
