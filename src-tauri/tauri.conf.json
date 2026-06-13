@@ -39,8 +39,5 @@
     "category": "SocialNetworking",
     "shortDescription": "See whether anyone nearby noticed something too.",
     "longDescription": "A privacy-preserving neighborhood signal map. Send a low-friction anonymous \"I noticed something\" signal; locations are intentionally randomized so no single sender's true location can be inferred."
-  },
-  "plugins": {
-    "global-shortcut": {}
   }
 }
