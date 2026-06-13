@@ -1,66 +1,74 @@
 # Progress
 
-_Last updated: 2026-06-13 (loop #15)_
+_Last updated: 2026-06-13 (loop #16)_
 
 ## Status
-**Native launch crash #2 root-caused and fixed (config-only).** The user moved
-ISSUE-202606131620 to `approved/` but their **Response reported a NEW failure**:
-running the rebuilt binary printed
-`failed to initialize plugin global-shortcut: ... invalid type: map, expected unit`
-— a *different* error from the Review-6 SIGABRT, and it aborts **before** Loop #14's
-"show the window on launch" fix can run. Treated as a fresh crash report (it outranks
-planned polish). This loop:
+**Native launch saga is RESOLVED — the app finally launches and shows the map.**
+The user moved ISSUE-202606131705 to `approved/`; its Response was a *partial* win:
+**"The app is open now, but no dot generated after signaling."** That confirms the
+Loop #15 `invalid type: map` config fix worked (the menu-bar app launches and presents
+the map). Two new reviews also arrived and were both triaged + acted on this loop:
+- **Review 7** ("don't allow map moving/zoom for now") and the "no dot" report were
+  handled together (TASK-202606131720, done):
+  - **Locked the map** (`src/ui/mapView.ts`): disabled drag/scroll-wheel/double-click/
+    box/keyboard/touch zoom + removed the `+/-` control → a fixed frame. Programmatic
+    `setView` (recenter) still works.
+  - **Recenter on each sent signal** (`src/main.ts` `sendSignal()`): after `store.add`,
+    `mapView.recenter(record.jittered_lat, record.jittered_lng)`. The most likely cause
+    of "no dot" was a sent dot landing **outside a now-locked viewport** — recentering on
+    the already privacy-safe (jittered/bucketed) point guarantees the dot is visible. No
+    raw coordinate is read/stored/displayed; the privacy path is untouched.
+- **Review 8** (time-critical: "~30-40 min to submit; need GitHub + web hosting"):
+  made the web app **deploy-ready** (TASK noted in Run Log):
+  - `vite.config.ts` → `base: "./"` so built assets load at any path (domain root OR a
+    GitHub Pages project subpath); `dist/index.html` now references `./assets/...`.
+  - Added `.github/workflows/deploy.yml` (Actions → build + test + publish `dist/` to
+    GitHub Pages on push to `main`).
+  - The irreversible publish step (create public repo + push) is the user's call →
+    raised **ISSUE-202606131725** with exact copy-paste `gh` commands (`gh` is already
+    authenticated as `finejuly`). **No remote exists yet; nothing pushed.**
 
-- **Native launch-crash fix (TASK-202606131700 → done, commit `7ab5dfa`):** removed
-  the `plugins.global-shortcut: {}` block from `src-tauri/tauri.conf.json`. The
-  `tauri-plugin-global-shortcut` v2 plugin takes **no** JSON config (config type =
-  *unit*); the empty `{}` deserialized as a **map**, so Tauri rejected the config at
-  startup and `builder.run()` returned `Err` before any window showed. The plugin is
-  registered + configured entirely at runtime in `lib.rs`, so the config block was
-  both invalid and unnecessary. **No privacy/location code touched** (config-only).
-  Verified: `cargo check` clean (0 warnings); JSON parses with no `plugins` key; web
-  tests **66/66**; `build:core` privacy-core bundle SHA **byte-for-byte unchanged**.
+Verified this loop: tests **66/66**; `tsc`+`vite build` clean; `build:core` privacy-core
+bundle SHA **`103c823…` byte-for-byte unchanged** (proves no privacy/location code touched).
 
 ## Snapshot
-- Tasks: candidates 0 · ready 0 · active 0 · done **12** (TASK-...1700 added this loop)
-- Issues: pending **1** (ISSUE-...1705, 3rd native launch re-verify after the config
-  fix) · approved **8** (ISSUE-...1620 was moved here by the user; its Response carried
-  the new error, now triaged into TASK-...1700) · rejected 2
-- Reviews: 0 pending (6 processed; no new review this loop — the new defect arrived in
-  the ISSUE-...1620 Response rather than as Review 7, and was triaged the same way)
-- App: web app builds; `npm run dev` → http://localhost:5173/ ; **tests 66/66**. Native
-  macOS `.app` config fix is `cargo check`-clean; needs a GUI rebuild+smoke-test
-  (ISSUE-...1705). `build:core` reference bundle **byte-for-byte unchanged** (same SHA).
-- Issue gate: **1/10 — clear** (implementation permitted this loop). Config:
+- Tasks: candidates 0 · ready 0 · active 0 · done **13** (TASK-...1720 added this loop)
+- Issues: pending **1** (ISSUE-...1725, submission publish/host — time-critical action) ·
+  approved **9** (incl. ISSUE-...1705, now effectively resolved: app launches + shows map;
+  the "no dot" follow-up is fixed by TASK-...1720) · rejected 2
+- Reviews: **0 pending** (8 processed — Review 7 + Review 8 triaged this loop)
+- App: web app builds; `npm run dev` → http://localhost:5173/ ; **tests 66/66**. Map is now
+  a locked view; sent signals recenter into view. Native `.app` launches + shows the map.
+  Web build is deploy-ready (relative base + Pages workflow). `build:core` SHA unchanged.
+- Issue gate: **1/10 — clear** (implementation permitted; it ran). Config:
   refresh_minutes=1, unanswered_issue_limit=10.
+- Commits this loop (local `main`, not pushed — no remote yet):
+  - "lock map pan/zoom (Review 7) + recenter on each sent signal"
+  - "make web app deploy-ready for submission (Review 8)"
 
 ## Now / Next
-- **USER (one quick re-verify — please action ISSUE-...1705)**: rebuild
-  (`npm run tauri:build`) then launch the `.app` and confirm the **`invalid type: map`
-  error is gone and the map window appears on launch** (menu-bar icon; Cmd+Shift+Space
-  fires one signal; close hides to menu bar; tray Quit exits). Approve if green; if a
-  new/different error appears, paste the exact console line (or drop `Reviews/Review 7.md`).
-- **Loop #16 (default)**: if ISSUE-...1705 is approved → native shell is finally
-  demo-ready; pivot to **M6 web-demo polish** on the web spine (e.g. a brief on-screen
-  "how this protects you" privacy callout, first-run demo narration, or a denser/livelier
-  seeded scenario for the activity strip). If a new native error/review lands → triage
-  first. If the user provides a signing identity or real logo, wire those in.
-- **User live-test (web app, the demo spine — always reliable)**: http://localhost:5173/
-  — answer headline at the top of the map; toggle Demo mode → activity strip / scrub /
-  Play history (2×/4×) → headline reframes live↔history; Density; Verification mode
-  (off by default). Space hotkey + Notice button unchanged.
+- **USER (time-critical — please action ISSUE-...1725 now):** run the one block in option 1
+  to create the GitHub repo + push + enable Pages → live at
+  https://finejuly.github.io/was-it-just-me/ in ~1-2 min. (Or option 2 for repo-only.)
+  `gh` is already authenticated. Paste any command error and the loop fixes it fast.
+- **Loop #17 (default):** if ISSUE-...1725 is approved/done → submission is shipped; if the
+  user reports the live Pages URL 404s or assets fail, debug the deploy (likely base-path /
+  Pages-source). Otherwise resume M6 web polish (privacy callout / first-run narration /
+  livelier seeded scenario). Triage any new review first.
+- **User live-test (web, the demo spine):** http://localhost:5173/ — answer headline; the map
+  is now fixed (no pan/zoom); Demo mode → activity strip / scrub / Play history (2×/4×);
+  Density; Verification mode (off by default). Space hotkey + Notice button send and recenter.
 
 ## Blocked
-- **Native `.app` launch re-verification (ISSUE-...1705)** — the config fix is `cargo
-  check`-clean but "does it now launch and show the window?" is a **human GUI smoke-test**
-  (headless can't run a GUI app). Not a build blocker; the web demo is unaffected.
-- **DMG** intentionally off by default (headless bundler limitation); produce on demand in
-  a GUI session (`npm run tauri -- build --bundles dmg`).
+- **Submission publish/host (ISSUE-...1725)** — needs the user to run the prepared `gh`
+  commands (irreversible: publishes code). App is built + green; this is the publish step only.
+- **DMG** intentionally off by default (headless bundler limit); produce in a GUI session
+  (`npm run tauri -- build --bundles dmg`).
 - **App icon is a placeholder** — swap via `tauri icon <png>` when a real logo exists.
-- **Code signing**: app is ad-hoc signed. A Developer-ID/notarized build remains the
-  robust path only if a future macOS-26 registration issue resurfaces (not currently seen).
+- **Code signing**: app is ad-hoc signed; Developer-ID/notarization only if a future macOS
+  registration issue resurfaces (not currently seen).
 
 ## Note on loop durability
 Loop is **session-scoped**: advances only while this session is active; idles/closes stop it.
-Config is `refresh_minutes=1`. A fixed-interval cron is more robust within a running
-session — switchable on request.
+Config is `refresh_minutes=1`. A fixed-interval cron is more robust within a running session
+— switchable on request.

@@ -61,3 +61,8 @@ Rebuild, run steps 2–5, and **approve option 1** if the map window now appears
 config error. If anything else surfaces, paste the console line — each of these has
 been a precise, one-shot-fixable config/runtime error, and this one was diagnosable
 straight from the message you provided.
+
+
+# Response
+
+The app is open now, but no dot generated after signaling
