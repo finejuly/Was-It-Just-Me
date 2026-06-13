@@ -1,12 +1,17 @@
 ---
 id: 202606131312
 title: Your note on the rejected standalone-app issue said "Implement Native menu-bar app" — confirm intent?
-status: pending
+status: approved
+decision: native
 type: decision
 created: 2026-06-13
+resolved: 2026-06-13
 raised_by: loop-orchestrate (loop #8)
 relates_to: ISSUE-202606131310 (standalone sender), ISSUE-202606131230 (platform decision)
 ---
+
+## Resolution (loop #8, 2026-06-13)
+User answered in real time: moved this file to `Issues/approved/` with `# Response: Native`. **Decision is now unambiguous: build the native menu-bar app (Option 2 — Swift/SwiftUI `NSStatusItem`), accepting the rewrite cost.** The earlier "Implement Native menu-bar app" note on ISSUE-...1310 was intentional, not a slip. This reverses the "stay web" assumption for the *sender* path. Next loop should plan/start the native app build (see new task TASK-202606131313). The existing web app remains the map/view and the instant fallback for the demo.
 
 ## Context
 You moved **ISSUE-202606131310** (standalone signal-sender app: Tauri vs Electron vs native) into `Issues/rejected/`. But that same file's `# Response` section reads **"Implement Native menu-bar app"** — i.e. Option 3 (a native Swift/SwiftUI `NSStatusItem` app).
@@ -27,3 +32,7 @@ This is a costly, hard-to-reverse platform decision, so per the loop's "raise an
 
 ## How to answer
 Reply, or move this file to `Issues/approved/` with a one-word note (web / tauri / electron / native), or to `Issues/rejected/` to confirm "stay web, stop asking."
+
+# Response
+
+Native

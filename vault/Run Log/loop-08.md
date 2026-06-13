@@ -24,4 +24,6 @@
 
 - **Commit**: small commit on `main` (no branch, no push, no PR; workspace.json excluded). Hash recorded in the loop summary.
 
-- **Stop reason**: one focused non-gated increment shipped + verified; one clarifying issue pending. Awaiting user on ISSUE-...1312 and a live browser test.
+- **Late-breaking user action (post first commit)**: while committing, the user moved the just-raised ISSUE-...1312 to `Issues/approved/` and wrote `# Response: Native` — confirming they DO want the **native macOS menu-bar app** (Option 2), resolving the ambiguity deliberately. Recorded honestly: marked ...1312 approved (`decision: native`), created **TASK-...1313** (native menu-bar sender) as a candidate for loop #9 with a privacy-preservation plan (prefer JSC/WKWebView reuse over a core rewrite). Did **not** start the native build this loop — it's a large multi-step effort for the next iteration; second small commit captures the state change.
+
+- **Stop reason**: one focused non-gated increment shipped + verified (demo stage playback, 50/50). User approved the native-sender pivot in real time → queued as TASK-...1313 for loop #9. Issue gate now 0/10. Awaiting: loop #9 to plan/build the native app; user live browser test of playback.
