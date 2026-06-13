@@ -17,6 +17,7 @@ import { transformSignal, type SignalRecord } from "./core/privacy.ts";
 import { SignalStore } from "./ui/store.ts";
 import { MapView } from "./ui/mapView.ts";
 import { getCurrentPosition, type GeoFix } from "./ui/geo.ts";
+import { answerFor } from "./ui/answer.ts";
 import {
   DEMO_CENTER,
   DEMO_SEED,
@@ -34,6 +35,7 @@ const $ = <T extends HTMLElement>(id: string): T => {
 };
 
 const scrubber = $<HTMLInputElement>("scrubber");
+const answerEl = $<HTMLDivElement>("answer");
 const activityStrip = $<HTMLDivElement>("activity-strip");
 const timeMode = $<HTMLSpanElement>("time-mode");
 const timeReadout = $<HTMLSpanElement>("time-readout");
@@ -251,11 +253,21 @@ function renderStrip(records: readonly SignalRecord[], win: ViewWindow): void {
   activityStrip.replaceChildren(frag);
 }
 
+function renderAnswer(count: number, isLive: boolean): void {
+  const { text, tone } = answerFor(count, isLive);
+  // Bold the count inline without exposing anything beyond the aggregate number.
+  answerEl.textContent = text;
+  answerEl.classList.toggle("is-quiet", tone !== "together");
+  answerEl.classList.toggle("is-together", tone === "together");
+  answerEl.hidden = false;
+}
+
 function refresh(records: readonly SignalRecord[]): void {
   const win = currentWindow(records);
   if (win === null) {
     mapView.render([]);
     timeReadout.textContent = "No signals yet";
+    renderAnswer(0, live);
     activityStrip.hidden = true;
     activityStrip.replaceChildren();
     return;
@@ -263,6 +275,7 @@ function refresh(records: readonly SignalRecord[]): void {
   const visible = inWindow(records, win.fromT, win.toT);
   mapView.render(visible);
   renderStrip(records, win);
+  renderAnswer(visible.length, live);
 
   timeMode.textContent = live ? "Live" : "History";
   liveBtn.hidden = live;

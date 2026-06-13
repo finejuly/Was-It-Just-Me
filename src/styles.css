@@ -122,6 +122,50 @@ body {
   filter: drop-shadow(0 0 3px rgba(74, 144, 164, 0.5));
 }
 
+/* Headline "answer" overlay -------------------------------------------------
+   Floats over the top of the map and answers the product's question from the
+   aggregate count in view (never coords, never per-sender). pointer-events:none
+   so it never intercepts map drags/clicks. Calm teal — reassuring, not alarmist.
+   Leaflet panes sit at z-index ~200–700; we sit above them but below the panels. */
+.answer {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(90%, 560px);
+  text-align: center;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--ink);
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  z-index: 800;
+  transition: opacity 0.25s ease;
+}
+
+/* Lone / quiet states read softer than the reassuring "others noticed" state. */
+.answer.is-quiet {
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.answer.is-together {
+  color: var(--accent);
+}
+
+.answer[hidden] {
+  display: none;
+}
+
+.answer .answer-count {
+  font-variant-numeric: tabular-nums;
+}
+
 /* Time panel ----------------------------------------------------------- */
 .time-panel {
   padding: 12px 20px;

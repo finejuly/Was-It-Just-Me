@@ -47,7 +47,14 @@
         ⚠ Verification mode: privacy OFF — exact location shown
       </div>
 
-      <div id="map" aria-label="Neighborhood signal map"></div>
+      <div id="map" aria-label="Neighborhood signal map">
+        <!-- The headline "answer" to the product's question, driven solely by the
+             privacy-safe aggregate count currently in view (no coordinates, no
+             per-sender data). It turns "N signals" into the reassuring collective-
+             noticing message that is the whole point of the app, and updates live
+             as signals arrive and as the operator scrubs through history. -->
+        <div id="answer" class="answer" role="status" aria-live="polite"></div>
+      </div>
 
       <div class="time-panel">
         <div class="time-row">

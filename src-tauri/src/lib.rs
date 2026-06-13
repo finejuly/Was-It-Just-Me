@@ -40,12 +40,15 @@ fn fire_notice<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
     let _ = app.emit(NOTICE_EVENT, ());
 }
 
-/// Show + focus the main window (used by the tray "Show map" item and when the
-/// user re-activates a window that was hidden to the tray). As an accessory
-/// (menu-bar) app the window starts hidden from the Dock; showing it from the
-/// tray is the normal way in.
+/// Show + focus the main window (used at launch, by the tray "Show map" item,
+/// and when the user re-activates a window that was hidden to the tray). As an
+/// accessory (menu-bar) app the window has no Dock presence and macOS does NOT
+/// auto-front it on launch, so we surface it explicitly through this one path.
+/// `unminimize` covers the case where it was minimized; `show` + `set_focus`
+/// bring an otherwise-hidden/backgrounded window to the front.
 fn show_main<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
     if let Some(win) = app.get_webview_window("main") {
+        let _ = win.unminimize();
         let _ = win.show();
         let _ = win.set_focus();
     }
@@ -114,6 +117,15 @@ pub fn run() {
                     }
                 });
             }
+
+            // --- Surface the map window on launch ---------------------------
+            // An accessory (menu-bar) app has no Dock presence and macOS does
+            // NOT auto-front its window at launch, so `visible: true` alone made
+            // the app appear to "open nothing" (ISSUE-202606131516 user report).
+            // Bring the map window forward explicitly via the same show path the
+            // tray "Show map" uses. Infallible (logs/continues), so it can never
+            // reintroduce the Review-6 startup abort.
+            show_main(&handle);
 
             Ok(())
         });
