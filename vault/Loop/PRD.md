@@ -128,7 +128,8 @@ Explicitly **absent**: raw GPS, user/device identity, category/type/severity, fr
 ---
 
 ### Open product questions
-- Target platform(s) for the demo (desktop background app vs. mobile vs. web) — affects hotkey/background implementation. _Raise as a pending issue before implementation planning locks the stack._
+- **Sender platform under revision (ISSUE-202606131310):** the map/view is a web app, but per Review 5 the *send* path should become a **standalone app** (true global hotkey, background/tray) because opening a browser to send is too slow. Recommendation: Tauri v2 (reuses the existing TS core/UI). This revisits the original web-app decision (ISSUE-202606131230) for the sending experience specifically.
 
 ### Changelog
 - 2026-06-13 — Initial PRD generated from IDEA.md (`loop-prd`).
+- 2026-06-13 (loop #7) — Web app now reads **real geolocation** at send time (routed through the privacy transform) instead of a fixed center, and adds an **off-by-default verification mode** (exact location, privacy disabled, clearly labeled) for testing. Sender-platform pivot to a standalone app under decision (ISSUE-202606131310).

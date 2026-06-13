@@ -19,6 +19,10 @@ export class MapView {
   private map: L.Map;
   private dotLayer = L.layerGroup();
   private densityLayer = L.layerGroup();
+  // Verification-only layer: holds the EXACT, un-jittered captured point. It is
+  // separate from the privacy-safe dot/density layers and is only ever populated
+  // by the explicit, off-by-default verification path — never by normal records.
+  private exactLayer = L.layerGroup();
 
   constructor(elementId: string, center: LatLng) {
     this.map = L.map(elementId, {
@@ -42,11 +46,55 @@ export class MapView {
 
     this.densityLayer.addTo(this.map);
     this.dotLayer.addTo(this.map);
+    this.exactLayer.addTo(this.map);
   }
 
   setShowDensity(show: boolean): void {
     if (show) this.densityLayer.addTo(this.map);
     else this.densityLayer.removeFrom(this.map);
+  }
+
+  /** Recenter (and gently zoom to) a point, e.g. the user's real location. */
+  recenter(lat: number, lng: number, zoom: number = INITIAL_ZOOM): void {
+    this.map.setView([lat, lng], zoom);
+  }
+
+  /**
+   * VERIFICATION ONLY — plot the EXACT captured coordinates, bypassing the
+   * privacy transform (no bucketing, no jitter). This is a debug aid to confirm
+   * location capture is correct and is only called from the explicit, off-by-
+   * default verification toggle. It NEVER touches the privacy-safe record path.
+   */
+  showExactLocation(lat: number, lng: number, accuracyM?: number): void {
+    this.exactLayer.clearLayers();
+    if (accuracyM !== undefined && accuracyM > 0) {
+      L.circle([lat, lng], {
+        radius: accuracyM,
+        color: "#b00020",
+        weight: 1,
+        fillColor: "#b00020",
+        fillOpacity: 0.08,
+        interactive: false,
+      }).addTo(this.exactLayer);
+    }
+    L.circleMarker([lat, lng], {
+      radius: 7,
+      color: "#b00020",
+      weight: 2,
+      fillColor: "#ff5252",
+      fillOpacity: 0.95,
+      interactive: true,
+    })
+      .bindTooltip(
+        `Exact location (verification): ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+        { direction: "top", permanent: false },
+      )
+      .addTo(this.exactLayer);
+  }
+
+  /** Clear the verification-only exact-location marker. */
+  clearExactLocation(): void {
+    this.exactLayer.clearLayers();
   }
 
   /** Re-render both layers for the given (already time-filtered) record set. */

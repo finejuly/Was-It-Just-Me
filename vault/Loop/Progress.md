@@ -1,22 +1,24 @@
 # Progress
 
-_Last updated: 2026-06-13 13:01_
+_Last updated: 2026-06-13 13:40_
 
 ## Status
-**The app is runnable and user-testable.** Loop #6 built the web UI (TASK-202606131233, Vite + TS + Leaflet) wiring the tested core/sim/aggregate modules, verified it (typecheck + build + 42 tests), and **launched the dev server at http://localhost:5173/**. Acting on Review 4, prioritized reaching a testable build and proactively raised two decision issues. The end-to-end demo spine (privacy core → simulator → map + density + scrubber + hotkey send) now exists.
+Loop resumed after an idle stop (self-paced wakes only fire while the session is active) and processed Review 5 in full. The web app now reads **real geolocation** at send time (privacy-transformed) and has an off-by-default **verification mode** for exact-location testing; the >3 km report was the app using the fixed SF demo center, not a privacy/transform bug. Run Logs are now one-file-per-loop. The **standalone-sender pivot** (Review 5.3) is captured as a decision issue.
 
 ## Snapshot
-- Tasks: candidates 1 (TASK-...234 UI remainder) · ready 0 · active 0 · done 3
-- Issues: pending 2 (demo location ...1301, offline basemap ...1302) · approved 1 · rejected 0
-- Reviews: 0 pending (4 processed)
-- App: builds (`dist/`), `npm run dev` → http://localhost:5173/ ; tests 42/42
-- Issue gate: 2/5 — clear
-- config: refresh_minutes=3 (180s cadence)
+- Tasks: candidates 1 (TASK-...234 UI remainder) · ready 0 · active 0 · done 4
+- Issues: pending 1 (ISSUE-...1310 standalone app) · approved 2 · rejected 1
+- Reviews: 0 pending (5 processed)
+- App: builds; `npm run dev` → http://localhost:5173/ ; tests 42/42; geolocation + verification mode added (privacy verifier PASS)
+- Issue gate: 1/5 — clear · config: refresh_minutes=3
 
 ## Now / Next
-- **User testing**: please open http://localhost:5173/ and give practical feedback (drop notes in `vault/Reviews/`).
-- **Awaiting decisions**: ISSUE-...1301 (demo location/scenario), ISSUE-...1302 (offline basemap).
-- **Next build**: TASK-202606131234 UI remainder is largely covered (scrubber + density shipped in the scaffold); a focused pass on history/live UX polish + heatmap visualization is the main remaining product work. Background/global-hotkey (desktop) is out of scope for the web MVP unless revisited.
+- **User**: (a) live-test geolocation + verification mode at http://localhost:5173/ (allow location; toggle Verification mode); (b) decide **ISSUE-...1310** (standalone sender — recommend Tauri v2) by moving it in `Issues/`.
+- **If Tauri approved**: first task installs Rust + scaffolds `src-tauri/` (global hotkey + tray, reusing the TS core) and pre-builds the demo binary.
+- **Remaining product polish**: history/heatmap UX (TASK-...234).
 
 ## Blocked
-- None. Two open decision issues are advisory (don't block testing).
+- None blocking. ISSUE-...1310 gates only the standalone-sender build, not testing the current web app.
+
+## Note on loop durability
+This loop is **session-scoped**: it advances only while this session is active and will stop again if the session idles/closes. A fixed-interval cron (`*/3 * * * *`) is more robust within a running session — switchable on request.

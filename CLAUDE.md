@@ -37,7 +37,7 @@ vault/           # Obsidian vault = persistent Loop state
     Issues/         # pending/ → approved/ → rejected/  (approval-gated work items)
     Tasks/          # candidates/ → ready/ → active/ → done/  (task lifecycle)
   Reviews/          # Review-module output, triaged back in as new Tasks/Issues
-  Run Log/          # Append-only log of loop runs
+  Run Log/          # History of loop runs — one file per loop (loop-NN.md)
   Info/Resources.md # Reference links (Claude Code, API, MCP, Skills docs)
   Info/Vault-Map.md # Authoritative path→role→skill assignment + coverage check
 ```

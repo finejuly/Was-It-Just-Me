@@ -80,6 +80,32 @@ body {
   height: 16px;
 }
 
+/* Verification mode toggle + banner ----------------------------------- */
+.toggle-verify span {
+  color: #b00020;
+  font-weight: 600;
+}
+
+.toggle-verify input {
+  accent-color: #b00020;
+}
+
+.verify-banner {
+  background: #b00020;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 9px 16px;
+  letter-spacing: 0.01em;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(176, 0, 32, 0.35);
+}
+
+.verify-banner[hidden] {
+  display: none;
+}
+
 /* Map ------------------------------------------------------------------ */
 #map {
   flex: 1;

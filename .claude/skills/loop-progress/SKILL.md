@@ -34,12 +34,13 @@ _Last updated: <YYYY-MM-DD HH:MM>_
 - <blockers + the ISSUE-... gating them, or "none">
 ```
 
-### `vault/Run Log/<YYYY-MM-DD>.md` (append-only)
-Append a timestamped entry: which modules ran, what changed, decisions raised, and the stop reason if the issue gate blocked the loop.
+### `vault/Run Log/loop-<NN>.md` (one file per loop)
+Write a **new file per loop iteration** (not per day): `vault/Run Log/loop-<NN>.md`, zero-padded, where `<NN>` is the next loop number (scan the folder for the highest existing `loop-*.md`). Each file: title `# Loop #<N> — <YYYY-MM-DD HH:MM>`, then which modules ran, what changed, decisions raised, and the stop reason (incl. if the issue gate blocked the loop).
 
 ## Rules
-- `Progress.md` reflects *current* state (refresh it); `Run Log/` is *history* (only append).
+- `Progress.md` reflects *current* state (refresh it); each `Run Log/loop-<NN>.md` is *history* for one iteration (write once, don't rewrite past loops).
 - Use the real date/time via `date`.
+- _Convention set by Review 5: one Run Log file per loop, not per day._
 
 ## Output
 - Updated `Progress.md` + appended run-log entry.

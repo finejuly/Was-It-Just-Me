@@ -18,6 +18,7 @@ _Durable conventions/decisions the loop applies every iteration. Maintained by `
 - **Prioritize to user-testable**: each cycle, push implementation to the point where the user can personally run and verify the result, then surface how to test it (user feedback, [Review 4](../Reviews/processed/Review%204.md)). _How to apply:_ favor an end-to-end runnable slice over polishing one layer; after building, launch/verify it and give the user the exact way to try it.
 
 ## Privacy implementation rules (from TASK-202606131231)
+- **Debug/verification features are off by default and clearly labeled.** Any mode that bypasses privacy (e.g. exact-location "verification mode") must be opt-in, forced off at boot, visibly bannered while active, and must never touch the privacy-safe store/render path. The default send path always routes through `transformSignal` (jitter + bucketing). _Why:_ Review 5 asked for an exact-location verification view; it must not become a way to leak real location by default.
 - Jitter must be a **uniform-random point within the geohash cell**, never center-biased (leaks center) and never a fixed offset (subtractable). Draw randomness **independently per signal** so repeated signals from one location scatter across the cell (defeats triangulation).
 - The persisted/transmitted record holds **only** `{id, cell, jittered_lat, jittered_lng, t, source}` — never raw GPS, identity, or exact timestamp.
 - Display via `visibleCells` enforces **k-anonymity** (default K=3) before a cell is shown.

@@ -30,8 +30,22 @@
             <input type="checkbox" id="heatmap-toggle" checked />
             <span>Density view</span>
           </label>
+          <label class="toggle toggle-verify" title="Debug aid: shows your exact location with privacy turned off.">
+            <input type="checkbox" id="verify-toggle" />
+            <span>Verification mode</span>
+          </label>
         </div>
       </header>
+
+      <div
+        id="verify-banner"
+        class="verify-banner"
+        role="alert"
+        aria-live="assertive"
+        hidden
+      >
+        ⚠ Verification mode: privacy OFF — exact location shown
+      </div>
 
       <div id="map" aria-label="Neighborhood signal map"></div>
 

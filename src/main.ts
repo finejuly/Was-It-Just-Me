@@ -9,9 +9,10 @@
 import "leaflet/dist/leaflet.css";
 import { triggerSignal, generateScenario } from "./sim/simulator.ts";
 import { inWindow, timeBounds } from "./core/aggregate.ts";
-import type { SignalRecord } from "./core/privacy.ts";
+import { transformSignal, type SignalRecord } from "./core/privacy.ts";
 import { SignalStore } from "./ui/store.ts";
 import { MapView } from "./ui/mapView.ts";
+import { getCurrentPosition, type GeoFix } from "./ui/geo.ts";
 import {
   DEMO_CENTER,
   DEMO_SEED,
@@ -36,12 +37,19 @@ const noticeBtn = $<HTMLButtonElement>("notice-btn");
 const confirmEl = $<HTMLDivElement>("confirm");
 const demoToggle = $<HTMLInputElement>("demo-toggle");
 const heatmapToggle = $<HTMLInputElement>("heatmap-toggle");
+const verifyToggle = $<HTMLInputElement>("verify-toggle");
+const verifyBanner = $<HTMLDivElement>("verify-banner");
 
 // --- View state ----------------------------------------------------------
 // `live` true => follow the newest window. `live` false => show the window at
 // the scrubber's position (historical replay). The scrubber's integer value is
 // an offset (in LIVE_WINDOW_MS steps) from the timeline's start.
 let live = true;
+
+// The user's most recent REAL location, if geolocation succeeded. Raw coords
+// live here only transiently in-memory and are never persisted; the normal send
+// path immediately routes them through transformSignal (privacy on).
+let realFix: GeoFix | null = null;
 
 function loadDemo(): void {
   // Stamp the scenario across the recent past so "live" shows current activity
@@ -109,12 +117,81 @@ function showConfirm(msg: string): void {
 
 // --- One-gesture signal send ---------------------------------------------
 function sendSignal(): void {
-  // Date.now() is fine in the browser. triggerSignal routes through the privacy
-  // transform, so the added record is already jittered + bucketed + coarsened.
-  const record = triggerSignal(DEMO_CENTER, Date.now());
+  let record: SignalRecord;
+  if (realFix) {
+    // Use the user's REAL location, but route it through the DEFAULT privacy
+    // transform so the stored/displayed point is bucketed + jittered + coarsened
+    // exactly like every other signal. Raw coords never leave this call.
+    record = transformSignal(
+      realFix.coords.lat,
+      realFix.coords.lng,
+      Date.now(),
+      "real",
+    );
+  } else {
+    // No real location (denied/unavailable/not yet resolved): fall back to the
+    // demo center. triggerSignal also routes through the privacy transform.
+    record = triggerSignal(DEMO_CENTER, Date.now());
+  }
   store.add(record);
   live = true; // jump back to live so the new signal is visible
-  showConfirm("Thanks — your signal joined the others nearby.");
+  showConfirm(
+    realFix
+      ? "Thanks — your signal joined the others nearby."
+      : "Thanks — added near the demo area (location unavailable).",
+  );
+}
+
+// --- Real geolocation (UI layer only) ------------------------------------
+// On boot, try once to learn the user's real location so the map centers on
+// them and their sent signals come from their true area (privacy still applied).
+// Failure is non-fatal: we keep the demo center and surface a calm message.
+async function initRealLocation(): Promise<void> {
+  try {
+    const fix = await getCurrentPosition();
+    realFix = fix;
+    mapView.recenter(fix.coords.lat, fix.coords.lng);
+    // If verification mode was switched on before the fix resolved, plot it now.
+    if (verifyToggle.checked) plotExactFix(fix);
+  } catch (err) {
+    const message =
+      typeof err === "object" && err !== null && "message" in err
+        ? String((err as { message: unknown }).message)
+        : "Could not access your location.";
+    showConfirm(`${message} Showing the demo area instead.`);
+  }
+}
+
+// --- Verification mode (debug only; OFF by default; bypasses privacy) -----
+// When ON, plot the EXACT captured coordinates with NO jitter/bucketing, behind
+// a prominent banner. This is the only path that displays a raw location, and it
+// never feeds the privacy-safe record store or alters the default privacy path.
+function plotExactFix(fix: GeoFix): void {
+  mapView.showExactLocation(fix.coords.lat, fix.coords.lng, fix.accuracyM);
+  mapView.recenter(fix.coords.lat, fix.coords.lng);
+}
+
+async function setVerificationMode(on: boolean): Promise<void> {
+  verifyBanner.hidden = !on;
+  if (!on) {
+    mapView.clearExactLocation();
+    return;
+  }
+  // Turning it on: (re)request a fresh fix and plot the exact point.
+  try {
+    const fix = await getCurrentPosition();
+    realFix = fix;
+    plotExactFix(fix);
+  } catch (err) {
+    const message =
+      typeof err === "object" && err !== null && "message" in err
+        ? String((err as { message: unknown }).message)
+        : "Could not access your location.";
+    showConfirm(`Verification mode: ${message}`);
+    // Keep the banner up so the operator sees verification is engaged, but there
+    // is no exact point to show without a fix.
+    mapView.clearExactLocation();
+  }
 }
 
 // --- Wiring --------------------------------------------------------------
@@ -146,6 +223,10 @@ heatmapToggle.addEventListener("change", () => {
   mapView.setShowDensity(heatmapToggle.checked);
 });
 
+verifyToggle.addEventListener("change", () => {
+  void setVerificationMode(verifyToggle.checked);
+});
+
 demoToggle.addEventListener("change", () => {
   if (demoToggle.checked) {
     loadDemo();
@@ -161,5 +242,10 @@ demoToggle.addEventListener("change", () => {
 });
 
 // --- Boot ----------------------------------------------------------------
+// Verification mode must always start OFF regardless of any cached form state.
+verifyToggle.checked = false;
+verifyBanner.hidden = true;
 mapView.setShowDensity(heatmapToggle.checked);
 loadDemo();
+// Try to center on the user's real location (non-blocking; demo shows meanwhile).
+void initRealLocation();

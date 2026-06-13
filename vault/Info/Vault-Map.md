@@ -19,7 +19,7 @@ Defines the role of **every** path in the vault and which Loop skill reads/write
 | `Loop/Tasks/active/` | Tasks currently being implemented | `loop-implement` | `loop-orchestrate` |
 | `Loop/Tasks/done/` | Completed tasks | `loop-implement` | `loop-review`, `loop-learn` |
 | `Reviews/` | Independent review findings (triaged into tasks/issues) | `loop-review` | `loop-orchestrate` (triage), `loop-learn` |
-| `Run Log/` | Append-only history of loop runs | `loop-orchestrate` / `loop-progress` | `loop-orchestrate` |
+| `Run Log/` | History of loop runs — **one file per loop** (`loop-<NN>.md`) | `loop-orchestrate` / `loop-progress` | `loop-orchestrate` |
 | `Info/Resources.md` | External reference links | _(human-edited)_ | `loop-discovery` |
 | `Info/Vault-Map.md` | This meta doc — roles & assignments | _(setup-maintained)_ | humans, `loop-orchestrate` |
 
