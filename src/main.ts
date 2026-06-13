@@ -12,7 +12,7 @@ import {
   advancePlayback,
   type PlaybackSpeed,
 } from "./sim/playback.ts";
-import { inWindow, timeBounds } from "./core/aggregate.ts";
+import { inWindow, timeBounds, windowCounts } from "./core/aggregate.ts";
 import { transformSignal, type SignalRecord } from "./core/privacy.ts";
 import { SignalStore } from "./ui/store.ts";
 import { MapView } from "./ui/mapView.ts";
@@ -34,6 +34,7 @@ const $ = <T extends HTMLElement>(id: string): T => {
 };
 
 const scrubber = $<HTMLInputElement>("scrubber");
+const activityStrip = $<HTMLDivElement>("activity-strip");
 const timeMode = $<HTMLSpanElement>("time-mode");
 const timeReadout = $<HTMLSpanElement>("time-readout");
 const liveBtn = $<HTMLButtonElement>("live-btn");
@@ -159,8 +160,21 @@ function fmt(t: number): string {
   return new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-/** Compute the [fromT, toT) window currently being viewed. */
-function currentWindow(records: readonly SignalRecord[]): { fromT: number; toT: number } | null {
+/**
+ * The window currently being viewed, plus the scrubber grid it sits on.
+ * `startT` + `steps` describe the timeline the scrubber (and the activity strip)
+ * step over in LIVE_WINDOW_MS increments; `index` is the current scrubber step.
+ */
+interface ViewWindow {
+  fromT: number;
+  toT: number;
+  startT: number; // timeline origin = bounds.minT (grid start for windowCounts)
+  steps: number; // number of scrubber steps (== bars in the activity strip)
+  index: number; // current step the view is showing (0..steps)
+}
+
+/** Compute the window currently being viewed and the grid it lives on. */
+function currentWindow(records: readonly SignalRecord[]): ViewWindow | null {
   const bounds = timeBounds(records);
   if (bounds === null) return null;
   // Scrubber spans [minT, maxT] in LIVE_WINDOW_MS steps.
@@ -171,12 +185,70 @@ function currentWindow(records: readonly SignalRecord[]): { fromT: number; toT: 
   if (live) {
     scrubber.value = String(steps);
     const toT = bounds.maxT + 1; // inclusive of the newest window's records
-    return { fromT: toT - LIVE_WINDOW_MS, toT };
+    return {
+      fromT: toT - LIVE_WINDOW_MS,
+      toT,
+      startT: bounds.minT,
+      steps,
+      index: steps,
+    };
   }
 
   const offset = Number(scrubber.value);
   const fromT = bounds.minT + offset * LIVE_WINDOW_MS;
-  return { fromT, toT: fromT + LIVE_WINDOW_MS };
+  return {
+    fromT,
+    toT: fromT + LIVE_WINDOW_MS,
+    startT: bounds.minT,
+    steps,
+    index: offset,
+  };
+}
+
+/**
+ * Render the activity strip: one bar per scrubber step, height = per-window
+ * signal count (aggregate only — never per-sender, never coords). Bars line up
+ * 1:1 with the scrubber because both walk the same LIVE_WINDOW_MS grid from
+ * `startT`. The bar at the current `index` is highlighted. Clicking a bar scrubs
+ * to that window. Counts come from the tested pure core (`windowCounts`).
+ */
+function renderStrip(records: readonly SignalRecord[], win: ViewWindow): void {
+  // `steps` bars cover the historical frames [0..steps-1]; the live tail sits at
+  // index === steps, so we render `steps` bars and treat index===steps as "live".
+  const bars = Math.max(1, win.steps);
+  const counts = windowCounts(records, win.startT, LIVE_WINDOW_MS, bars);
+  const maxCount = counts.reduce((m, c) => Math.max(m, c), 0);
+
+  if (maxCount === 0) {
+    activityStrip.hidden = true;
+    activityStrip.replaceChildren();
+    return;
+  }
+  activityStrip.hidden = false;
+
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < bars; i++) {
+    const bar = document.createElement("button");
+    bar.type = "button";
+    bar.className = "activity-bar";
+    // 6%..100% height so even a 1-count window is visibly a tick, not invisible.
+    const h = 6 + (counts[i] / maxCount) * 94;
+    bar.style.height = `${h}%`;
+    if (i === win.index) bar.classList.add("is-current");
+    bar.setAttribute(
+      "aria-label",
+      `${counts[i]} signal${counts[i] === 1 ? "" : "s"} in this window`,
+    );
+    bar.title = `${counts[i]} noticed in this window`;
+    bar.addEventListener("click", () => {
+      stopPlayback();
+      scrubber.value = String(i);
+      live = false;
+      refresh(store.all());
+    });
+    frag.appendChild(bar);
+  }
+  activityStrip.replaceChildren(frag);
 }
 
 function refresh(records: readonly SignalRecord[]): void {
@@ -184,10 +256,13 @@ function refresh(records: readonly SignalRecord[]): void {
   if (win === null) {
     mapView.render([]);
     timeReadout.textContent = "No signals yet";
+    activityStrip.hidden = true;
+    activityStrip.replaceChildren();
     return;
   }
   const visible = inWindow(records, win.fromT, win.toT);
   mapView.render(visible);
+  renderStrip(records, win);
 
   timeMode.textContent = live ? "Live" : "History";
   liveBtn.hidden = live;

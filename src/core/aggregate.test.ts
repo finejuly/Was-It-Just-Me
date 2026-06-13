@@ -7,6 +7,7 @@ import {
   timeBounds,
   densityGrid,
   windowsOf,
+  windowCounts,
 } from "./aggregate.ts";
 
 // Build a minimal record. Only `cell` and `t` matter for aggregation; the
@@ -237,4 +238,50 @@ test("windowsOf aligns frame boundaries to multiples of windowMs", () => {
   assert.equal(frames[0].fromT, 1000);
   assert.equal(frames[0].toT, 2000);
   assert.equal(frames[0].records.length, 2);
+});
+
+// ---------------------------------------------------------------------------
+// windowCounts: per-window counts on a caller-supplied grid (scrubber sparkline).
+// ---------------------------------------------------------------------------
+
+test("windowCounts returns per-window counts aligned to the supplied grid", () => {
+  const w = 1000;
+  // 3 in [0,1000), 0 in [1000,2000), 2 in [2000,3000).
+  const records = [
+    mk(SEOUL, 0),
+    mk(SEOUL, 500),
+    mk(SEOUL, 999),
+    mk(SEOUL, 2000),
+    mk(NYC, 2500),
+  ];
+  assert.deepEqual(windowCounts(records, 0, w, 3), [3, 0, 2]);
+});
+
+test("windowCounts honors the half-open [from,to) boundary (no double counting)", () => {
+  const w = 1000;
+  // A record exactly on a frame boundary belongs to the next frame only.
+  const records = [mk(SEOUL, 1000)];
+  assert.deepEqual(
+    windowCounts(records, 0, w, 2),
+    [0, 1],
+    "t=1000 lands in [1000,2000), not in [0,1000)",
+  );
+  // And the per-window counts must sum to the records that fall in range.
+  const sum = windowCounts(records, 0, w, 2).reduce((a, b) => a + b, 0);
+  assert.equal(sum, 1);
+});
+
+test("windowCounts: empty input → all zeros; steps<=0 → empty array", () => {
+  assert.deepEqual(windowCounts([], 0, 1000, 4), [0, 0, 0, 0]);
+  assert.deepEqual(windowCounts([mk(SEOUL, 0)], 0, 1000, 0), []);
+  assert.deepEqual(windowCounts([mk(SEOUL, 0)], 0, 1000, -3), []);
+});
+
+test("windowCounts ignores records outside the grid and rejects non-positive window", () => {
+  const w = 1000;
+  // Records before the grid start and after its end must not be counted.
+  const records = [mk(SEOUL, -500), mk(SEOUL, 500), mk(SEOUL, 5000)];
+  // Grid is [0,1000) , [1000,2000): only t=500 is in range, in the first frame.
+  assert.deepEqual(windowCounts(records, 0, w, 2), [1, 0], "only t=500 is in [0,2000)");
+  assert.throws(() => windowCounts(records, 0, 0, 2), /windowMs must be > 0/);
 });

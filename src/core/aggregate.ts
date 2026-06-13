@@ -104,6 +104,39 @@ export function densityGrid(
   });
 }
 
+/**
+ * Per-window signal counts for an activity strip / sparkline under the scrubber.
+ *
+ * Returns an array of length `steps`, where entry `i` is the number of records whose
+ * coarsened `t` falls in the half-open frame `[fromT + i*windowMs, fromT + (i+1)*windowMs)`.
+ * The grid (`fromT`, `windowMs`, `steps`) is supplied by the caller so the bars line up
+ * 1:1 with the scrubber's own steps — the UI passes the exact same window math it scrubs
+ * over, guaranteeing each bar maps to one scrubber position.
+ *
+ * Privacy: this exposes ONLY per-window aggregate counts at the existing coarsened-`t`
+ * resolution (the same the live view already shows). It composes the tested `inWindow`
+ * filter rather than re-deriving binning, so it can never reveal finer-than-window time
+ * precision, and it never reads or returns any coordinate or per-sender field.
+ *
+ * Pure: no UI, no DOM, no platform APIs. Throws on a non-positive `windowMs` (matches
+ * `windowsOf`). `steps <= 0` yields an empty array.
+ */
+export function windowCounts(
+  records: readonly SignalRecord[],
+  fromT: number,
+  windowMs: number,
+  steps: number,
+): number[] {
+  if (windowMs <= 0) throw new Error("windowMs must be > 0");
+  const n = Math.max(0, Math.floor(steps));
+  const counts = new Array<number>(n).fill(0);
+  for (let i = 0; i < n; i++) {
+    const start = fromT + i * windowMs;
+    counts[i] = inWindow(records, start, start + windowMs).length;
+  }
+  return counts;
+}
+
 /** One frame of a scrubbable timeline: a window and the records falling in it. */
 export interface TimelineFrame {
   fromT: number;

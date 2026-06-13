@@ -64,6 +64,16 @@
           value="0"
           aria-label="Scrub through earlier activity"
         />
+        <!-- Activity strip: one bar per scrubber step, heights = per-window
+             signal counts (aggregate only, never per-sender). Lets the operator
+             see where the activity is and scrub straight to it. Counts come from
+             the tested pure core (windowCounts). Hidden when there are no signals. -->
+        <div
+          id="activity-strip"
+          class="activity-strip"
+          aria-hidden="true"
+          hidden
+        ></div>
         <!-- Demo stage controls: auto-advance the scrubber through the seeded
              timeline so historical replay runs hands-free on stage. Shown only
              while Demo mode is on; pure playback clock lives in sim/playback.ts. -->

@@ -174,6 +174,43 @@ body {
   accent-color: var(--accent);
 }
 
+/* Activity strip: per-window signal-count bars under the scrubber. Aggregate
+   counts only — a calm "where the noticing happened" sparkline, no alarm. ---- */
+.activity-strip {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  width: 100%;
+  height: 26px;
+  margin-top: 6px;
+}
+
+.activity-strip[hidden] {
+  display: none;
+}
+
+.activity-bar {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 6%;
+  padding: 0;
+  border: none;
+  border-radius: 3px 3px 0 0;
+  background: var(--accent-soft);
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.activity-bar:hover {
+  opacity: 0.8;
+}
+
+.activity-bar.is-current {
+  background: var(--accent);
+  opacity: 1;
+}
+
 /* Demo stage playback controls (play/pause + speed) -------------------- */
 .playback-row {
   display: flex;
