@@ -1,12 +1,17 @@
 ---
 id: 202606131230
 title: Which platform should the MVP target for the live demo?
-status: pending
+status: approved
 type: decision
 created: 2026-06-13
+resolved: 2026-06-13
+decision: Option 1 — Web app (TypeScript)
 raised_by: loop-discovery
 blocks: TASK-202606131233, TASK-202606131234
 ---
+
+> **Resolved 2026-06-13 (loop #3):** Approved as recommended → **Option 1, Web app (TypeScript)**. Recorded in [Preferences.md](../../Preferences.md). Unblocks TASK-202606131233 and TASK-202606131234 (now plannable).
+
 
 ## Context
 The PRD requires a global **hotkey** + **background, low-energy operation** (desktop-leaning) *and* **long-press/tap** (touch-leaning), plus a map, heatmap, and a reliable on-stage demo. The platform choice drives how the hotkey/background pieces are built and how the demo is presented. The PRD flags this as the open question blocking implementation planning. See [PRD.md](../../PRD.md) (Hotkey & background behavior; Open product questions) and [GOAL.md](../../GOAL.md).

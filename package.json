@@ -1,0 +1,10 @@
+{
+  "name": "was-it-just-me",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Privacy-preserving neighborhood signal map — \"Was It Just Me?\"",
+  "scripts": {
+    "test": "node --test src/core/*.test.ts"
+  }
+}

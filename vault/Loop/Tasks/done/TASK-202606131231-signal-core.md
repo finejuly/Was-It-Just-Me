@@ -1,12 +1,13 @@
 ---
 id: 202606131231
 title: Signal data model + privacy transform (jitter + bucketing) as a pure, tested module
-status: ready
+status: done
 priority: high
 source: discovery
 created: 2026-06-13
 planned: 2026-06-13
-language_runtime: pending ISSUE-202606131230 (design + test spec are language-independent)
+completed: 2026-06-13
+language_runtime: TypeScript (web app per ISSUE-202606131230); core runs anywhere, tested via node:test
 ---
 
 ## Summary
@@ -43,3 +44,18 @@ Property/unit tests per criterion above; this is the PRD's highest-priority test
 - Geohash cells are rectangular (aspect ratio leak) — acceptable; ensure jitter is uniform **within** the cell, never center-biased.
 - Triangulation across repeated signals is mitigated by uniform-within-cell + independent per-signal rng; document this invariant in the module.
 - Concrete language/test framework awaits ISSUE-202606131230; the design and test spec above are language-independent and ready to implement once the stack is chosen.
+
+## Result — done 2026-06-13 (loop #3)
+Implemented in TypeScript as a pure, dependency-free module (web-app stack approved in ISSUE-202606131230):
+- [src/core/geohash.ts](../../../../src/core/geohash.ts) — minimal geohash encode + cell-bounds decode (no deps).
+- [src/core/privacy.ts](../../../../src/core/privacy.ts) — `transformSignal`, `visibleCells`, `SignalRecord`, config, injectable CSPRNG; privacy invariants documented in the file header.
+- [src/core/privacy.test.ts](../../../../src/core/privacy.test.ts) — 11 tests via `node:test`.
+
+**Verification: `npm test` → 11/11 pass.** All acceptance criteria covered:
+- exactly the PRD fields, no raw/identity leakage ✓
+- `cell === geohash(raw, precision)` ✓ · within-cell invariant (500 random inputs) ✓
+- jitter never equals raw (500 inputs) ✓ · per-signal randomization ✓
+- timestamp coarsened to window ✓ · injectable deterministic rng ✓ · unique opaque id ✓
+- k-anonymity suppression ✓ · `source` flag preserved ✓
+
+No external dependencies installed (runs offline; no network/LLM). Consumable directly by the upcoming web/map UI (TASK-202606131233).

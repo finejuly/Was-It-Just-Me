@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Info/Resources.md",
+                "file": "Loop/Progress.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Resources"
+              "title": "Progress"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Info/Resources.md",
+                "file": "Loop/Progress.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Resources 의 백링크"
+              "title": "Progress 의 백링크"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Info/Resources.md",
+                "file": "Loop/Progress.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Resources 의 나가는 링크"
+              "title": "Progress 의 나가는 링크"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Info/Resources.md",
+                "file": "Loop/Progress.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Resources 의 개요"
+              "title": "Progress 의 개요"
             }
           }
         ]
@@ -185,11 +185,26 @@
   },
   "active": "306dd8d3f79f3640",
   "lastOpenFiles": [
+    "Reviews/Review 2.md",
+    "Reviews/processed/Review 1.md",
+    "Reviews/processed",
+    "Loop/Tasks/done/TASK-202606131231-signal-core.md",
+    "Loop/PRD.md",
+    "Loop/Tasks/candidates/TASK-202606131232-demo-simulator.md",
+    "Loop/Tasks/active/TASK-202606131231-signal-core.md",
+    "Loop/Tasks/candidates/TASK-202606131233-app-scaffold-map.md",
+    "Loop/Tasks/candidates/TASK-202606131234-time-history-scrub.md",
+    "Loop/Tasks/ready/TASK-202606131231-signal-core.md",
+    "Reviews/Review 1.md",
+    "Run Log/2026-06-13.md",
+    "Loop/Issues/approved/ISSUE-202606131230-target-platform.md",
+    "Info/Resources.md",
+    "Loop/Tasks/candidates/TASK-202606131231-signal-core.md",
+    "Info/Vault-Map.md",
     "Reviews",
     "Loop/Reviews",
     "Loop/GOAL.md",
     "Loop/Progress.md",
-    "Info/Resources.md",
     "Info",
     "Run Log",
     "Loop/Issues/rejected",
@@ -198,10 +213,7 @@
     "무제.md",
     "Loop/Issues",
     "Loop/Tasks/done",
-    "Loop/Tasks/active",
-    "Loop/Tasks/ready",
     "Loop/Preferences.md",
-    "Loop/PRD.md",
     "Loop/config.md",
     "환영합니다!.md"
   ]
