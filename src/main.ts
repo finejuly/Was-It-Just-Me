@@ -311,6 +311,12 @@ function sendSignal(): void {
   }
   store.add(record);
   live = true; // jump back to live so the new signal is visible
+  // Center the (now fixed / non-pannable) view on the new dot so it is always
+  // visibly present after signaling — the user reported "no dot after signaling"
+  // (ISSUE-202606131705), which happens when a sent dot lands outside a locked
+  // viewport. We recenter on the record's ALREADY privacy-safe jittered point
+  // (bucketed + jittered by transformSignal); no raw coordinate is used here.
+  mapView.recenter(record.jittered_lat, record.jittered_lng);
   showConfirm(
     realFix
       ? "Thanks — your signal joined the others nearby."

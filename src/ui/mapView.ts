@@ -31,7 +31,19 @@ export class MapView {
       minZoom: MIN_ZOOM,
       // Cap zoom so the view can never imply finer-than-bucket precision.
       maxZoom: MAX_ZOOM,
-      zoomControl: true,
+      // Locked view (Review 7: "don't allow map moving / zoom in / zoom out for
+      // now"). Every user-driven pan/zoom input is disabled and the +/- control
+      // is removed, so the map is a fixed frame. Programmatic `setView`
+      // (recenter()) is unaffected by these interaction locks, so the app can
+      // still center the view on launch, on a real-location fix, and on each
+      // sent signal — which is how a freshly sent dot stays in view.
+      zoomControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      touchZoom: false,
       attributionControl: true,
     });
 
