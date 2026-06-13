@@ -67,3 +67,7 @@ the menu-bar app and keep the web app as the demo spine. Only if it still crashe
 need a signing decision (option 2); raise a fresh review with the new crash log and the
 loop will pick it up. Do **not** revert to a foreground/Dock app (option 3) without
 signing, as that reintroduces the exact crash path.
+
+# Response
+
+No crash, but nothing was opened when open "src-tauri/target/release/bundle/macos/Was It Just Me.app"
