@@ -27,3 +27,10 @@ Second half of the approved native macOS menu-bar sender. Increment A (this loop
 ## Notes
 - Do NOT start until increment A's `swift build && swift test` is green (currently blocked by ISSUE-...1314 toolchain skew). Until then this is a planning placeholder.
 - Reuse the bridge from increment A verbatim; Swift writes no privacy logic.
+
+## Closed — loop #10 (2026-06-13) — SUPERSEDED by the Tauri pivot
+Superseded by the user's "move to Tauri" decision (ISSUE-...1314). The NSStatusItem GUI +
+Carbon global hotkey are replaced by Tauri's tray + global-shortcut plugins over the
+existing web app. The PRD goals this task served (tray, true global hotkey, background
+operation) carry over to **TASK-...1316** (Tauri shell); the open IPC sub-decision carries
+over to **ISSUE-...1317**. Closed — moved to done/ to clear the candidate pipeline.

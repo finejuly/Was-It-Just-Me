@@ -46,3 +46,31 @@ Move this file to `Issues/approved/` with a one-line note of which option you to
 
 # Response
 
+Let's move to Tauri then.
+---
+## Orchestrator note (loop #10, 2026-06-13) — APPROVED, actioned
+User decision: **"Let's move to Tauri then."** This chooses a 4th path beyond the
+listed options — instead of realigning the Swift toolchain (Opt 1/2) or merely
+deferring (Opt 3), **pivot the native sender to Tauri** (Rust + system webview).
+Rationale this unlocks:
+- The blocking Swift SDK/compiler skew becomes moot — Tauri builds via Rust/cargo,
+  not the broken Swift CLT.
+- Tauri **wraps the EXISTING web app as its frontend** → the privacy core, map,
+  scrubber, demo mode, and the new activity strip are reused verbatim, single
+  privacy implementation (honors "reuse, don't rewrite" + the privacy guarantee).
+- Tauri gives a real native shell: **system tray** + **true global shortcut**
+  (official plugins) for the PRD "Hotkey & background behavior" — without a JSC
+  bridge (the webview runs our JS natively, so the Swift→JSC bridge is no longer
+  needed for the send path).
+Actions taken this loop:
+- Superseded the Swift route: **TASK-...1313** (Swift JSC bridge, was active) and
+  **TASK-...1315** (NSStatusItem GUI + Carbon hotkey, was candidate) closed as
+  **superseded** → moved to Tasks/done/ with a superseded note (no rejected-tasks
+  folder exists; done = out of the active pipeline).
+- Created **TASK-...1316** (candidate): Tauri shell scaffold wrapping the web app.
+- Raised **ISSUE-...1317** (pending): the few remaining Tauri sub-decisions
+  (global-shortcut binding, tray behavior, how a tray/hotkey send reaches the web
+  SignalStore, packaging targets) — scoped tightly since the platform choice
+  (Tauri) is already made.
+The Swift bridge sources stay in-tree (`native/WIJMCore/`) as a reference artifact;
+they are no longer on the build path.

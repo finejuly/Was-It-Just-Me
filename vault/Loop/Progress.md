@@ -1,30 +1,29 @@
 # Progress
 
-_Last updated: 2026-06-13 (loop #9)_
+_Last updated: 2026-06-13 (loop #10)_
 
 ## Status
-Started the approved **native macOS menu-bar sender** (TASK-...1313). Loop #9 built **increment A** — the privacy bridge that lets the Swift app reuse the **unchanged, tested TS privacy core** through JavaScriptCore, so Swift writes **zero** privacy logic (honors "reuse, don't rewrite" + the highest-priority privacy guarantee). The **JS half is done and verified offline**; the **Swift half is written but cannot be built here** due to a machine-level toolchain skew.
+The user **answered the toolchain blocker (ISSUE-...1314) with a product-direction pivot: "Let's move to Tauri then."** — replacing the Swift/JSC native menu-bar route with a **Tauri** desktop shell that wraps the **existing web app verbatim** (one privacy core, no JSC bridge, no broken Swift toolchain). Loop #10 therefore (a) shipped a focused **web-app polish** that improves the live demo regardless of the native route, and (b) re-pointed the native track to Tauri (closed the Swift tasks, queued the Tauri build, raised a tight sub-decision issue).
 
-- **JS bridge (green):** `src/core/bridge.ts` exposes a narrow `WIJM.transformSignal` with injected rng+id (JSC lacks Web Crypto). `npm run build:core` esbuild-bundles the core to a classic IIFE script (`native/WIJMCore/.../Resources/wijm-core.js`, 4KB, no ESM, no runtime deps). New `src/core/bridge.test.ts` pins the exact contract Swift calls + privacy invariants. **Tests 50 → 57**; typecheck + build green; **web app untouched**.
-- **Swift (written, unverified):** `native/WIJMCore/` SwiftPM package (JSC only) — `SignalCore.swift` loads the bundle into a `JSContext`, injects `SecRandomCopyBytes` rng + UUID, decodes + asserts the six-field schema at the boundary; XCTest parity suite mirrors `privacy.test.ts`.
-- **Blocker (raised, not guessed):** `swift build`/`swift test` fail with an SDK-vs-compiler skew (SDK `swiftlang-6.2.1.4.7` vs compiler `...4.8`) that breaks **all** Swift compilation — proven with a trivial empty package *and* a one-file `swiftc` build, so it is **not** a defect in our code. Raised **ISSUE-...1314** asking the user to realign the Command Line Tools (or defer the native build for the hackathon).
+- **Web polish shipped (committed `b081dde`):** a **timeline activity strip** under the scrubber — one bar per scrubber step, height ∝ per-window signal count, current window highlighted, click-to-scrub. Reuses the tested core via a new pure `windowCounts()` (composes `inWindow`; counts only, no coords, no sub-window precision). Bars share the exact `LIVE_WINDOW_MS` grid the scrubber walks (1:1). **Tests 57 → 61** (+4); typecheck + build green; `build:core` bundle byte-for-byte unchanged; privacy path + verification mode untouched. TASK-...234 → done.
+- **Native track pivoted to Tauri:** closed the superseded Swift tasks (TASK-...1313 was active, TASK-...1315 was candidate) → done/ with superseded notes; the Swift bridge sources stay in-tree as reference only. Created **TASK-...1316** (candidate — Tauri shell wrapping the web app, tray + global hotkey). Raised **ISSUE-...1317** (pending — the few remaining Tauri sub-decisions: Rust toolchain presence, tray/hotkey→SignalStore mechanism, shortcut binding, close-to-tray, packaging scope; defaults proposed).
+- **Learnings recorded:** Preferences now codify "wrap the web app in a thin native shell, never a parallel native privacy rewrite" and "pick a toolchain that actually builds here."
 
 ## Snapshot
-- Tasks: candidates 2 (TASK-...234 history/heatmap UX; TASK-...1315 native GUI+hotkey [inc. B]) · ready 0 · **active 1 (TASK-...1313 — JS half green, Swift blocked)** · done 5
-- Issues: **pending 1 (ISSUE-...1314 toolchain skew)** · approved 3 · rejected 2
+- Tasks: candidates 1 (TASK-...1316 Tauri shell) · ready 0 · active 0 · done 8 (+TASK-...234, +closed Swift ...1313/...1315)
+- Issues: **pending 1 (ISSUE-...1317 Tauri sub-decisions)** · approved 4 (+...1314, answered "Tauri") · rejected 2
 - Reviews: 0 pending (5 processed)
-- App: web app builds; `npm run dev` → http://localhost:5173/ ; **tests 57/57** (+7 bridge contract); `npm run build:core` produces the JSC bundle. Native package present but unbuildable until the toolchain is fixed.
-- Issue gate: **1/10 — clear** · config: refresh_minutes=1, unanswered_issue_limit=10
+- App: web app builds; `npm run dev` → http://localhost:5173/ ; **tests 61/61** (+4 windowCounts). `npm run build:core` still produces the (now reference-only) JSC bundle, unchanged.
+- Issue gate: **1/10 — clear**. Config: refresh_minutes=1, unanswered_issue_limit=10.
 
 ## Now / Next
-- **User (decision needed)**: answer **ISSUE-...1314** — realign the Swift toolchain (Option 2 if Xcode.app is installed: `xcode-select -s /Applications/Xcode.app/...`; else reinstall CLT), or defer the native sender and ship the web demo. Resolve before loop #10 can verify the Swift half.
-- **Loop #10 (if toolchain fixed)**: run `cd native/WIJMCore && swift build && swift test` (expected green — the JS contract is already verified), then mark TASK-...1313 **done** and plan/start increment B (TASK-...1315: NSStatusItem GUI + global hotkey + IPC to web map).
-- **Loop #10 (if toolchain deferred)**: keep the Swift bridge in-tree; pivot to remaining **web polish** — history/heatmap UX (TASK-...234) — so the loop stays productive on the working demo.
-- **User live-test (web app, still the demo spine)**: http://localhost:5173/ — Demo mode → Play history (2×/4×), manual scrub, Back to live; geolocation + Verification-mode (off by default).
+- **User (decision needed)**: answer **ISSUE-...1317** — confirm the Tauri sub-decisions (a one-liner "defaults OK, Rust installed" suffices) so the next loop can scaffold the Tauri shell. Key items: is Rust/cargo installed? tray/hotkey send via a frontend event (recommended)? shortcut = `Cmd+Shift+Space`? close-to-tray? this-OS bundle only?
+- **Loop #11 (if ISSUE-...1317 approved)**: plan + scaffold **TASK-...1316** — add a Tauri project pointing at the existing Vite app (no UI fork), tray menu, `global-shortcut` plugin firing the unchanged `sendSignal()` path; verify `tauri dev`, keep `npm test`/`npm run build` green. (Probe Rust first; if absent, pause and surface the install.)
+- **Loop #11 (if ISSUE-...1317 still pending/rejected)**: continue web polish on the demo spine (e.g. demo-facing copy / reliability pass, GOAL #6 / milestone M6), since the web app is the working demo and Tauri wraps it.
+- **User live-test (web app, the demo spine)**: http://localhost:5173/ — Demo mode → the new **activity strip** under the scrubber shows where the noticing is; click a bar or drag to scrub; Play history (2×/4×); Back to live; Density view; Verification mode (off by default).
 
 ## Blocked
-- **TASK-...1313 Swift verification** — blocked by **ISSUE-...1314** (toolchain SDK/compiler skew; user action required). JS half is unblocked and green.
-- **TASK-...1315** (increment B) — blocked by TASK-...1313 going green (and thus by ISSUE-...1314).
+- **TASK-...1316 (Tauri shell)** — gated on **ISSUE-...1317** (sub-decisions) and on Rust/cargo being installed (to be confirmed in that issue).
 
 ## Note on loop durability
-Loop is **session-scoped**: advances only while this session is active; idles/closes stop it. Config is now `refresh_minutes=1`. A fixed-interval cron is more robust within a running session — switchable on request.
+Loop is **session-scoped**: advances only while this session is active; idles/closes stop it. Config is `refresh_minutes=1`. A fixed-interval cron is more robust within a running session — switchable on request.

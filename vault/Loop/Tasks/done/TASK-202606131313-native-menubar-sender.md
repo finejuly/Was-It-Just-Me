@@ -75,3 +75,13 @@ This is a large multi-step build. To keep it user-testable and low-risk, split i
 - [ ] Follow-up task for increment B (NSStatusItem GUI + global hotkey) — created as candidate TASK-...1315.
 
 **Resume plan (loop #10+):** once the user confirms the toolchain is realigned (per ISSUE-...1314), run `cd native/WIJMCore && swift build && swift test` — expected to pass unchanged since the JS contract is already verified — then move this task to `done` and proceed to increment B.
+
+## Closed — loop #10 (2026-06-13) — SUPERSEDED by the Tauri pivot
+User answered ISSUE-...1314 with **"Let's move to Tauri then."** The Swift→JSC native
+route is **superseded**: Tauri wraps the existing web app directly, so the JSC bridge
+(this task's deliverable) is no longer needed for the send path — the privacy core runs
+in Tauri's webview natively. The Swift bridge sources (`native/WIJMCore/`) remain in-tree
+as a reference artifact but are off the build path. The JS-half work from loop #9 (the
+`build:core` bundle + `bridge.test.ts`, 57→ later 61 tests) stays green and harmless.
+Closed (not "done" in the original sense) — moved to done/ to clear the active pipeline.
+Follow-on work tracked by **TASK-...1316** (Tauri shell) + **ISSUE-...1317** (Tauri sub-decisions).
