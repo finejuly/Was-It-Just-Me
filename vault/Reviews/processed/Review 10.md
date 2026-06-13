@@ -1,0 +1,1 @@
+When I start the app, it says 'Location permission was denied'. Get the permission.
