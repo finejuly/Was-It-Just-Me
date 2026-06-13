@@ -8,9 +8,9 @@ Core product logic is now substantially built and fully tested. Loop #4 acted on
 ## Snapshot
 - Tasks: candidates 2 · ready 0 · active 0 · done 2
 - Issues: pending 0 · approved 1 · rejected 0
-- Reviews: 0 pending (2 processed)
+- Reviews: 0 pending (3 processed)
 - Code: `src/core/{geohash,privacy,aggregate}.ts` + `src/sim/simulator.ts` (+ tests), 42 tests green
-- PRD/GOAL: in sync · Preferences: stack, code-first, **subagent parallelism**, privacy rules
+- PRD/GOAL: in sync · Preferences: stack, code-first, **subagent parallelism + worktree isolation**, privacy rules
 - Issue gate: 0/5 — clear · config: refresh_minutes=3 (180s cadence)
 
 ## Now / Next
