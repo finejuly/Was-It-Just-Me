@@ -1,21 +1,21 @@
 # Progress
 
-_Last updated: 2026-06-13 12:43_
+_Last updated: 2026-06-13 12:46_
 
 ## Status
-First product code shipped. Loop #3: platform decision approved (Web app / TypeScript), a review ("focus on actual code first") triaged into an immediate pivot to Implementation, and TASK-202606131231 (signal core + privacy transform) implemented and **verified green (11/11 tests)**. The privacy spine — geohash bucketing, uniform-within-cell jitter, timestamp coarsening, k-anonymity suppression — now exists as a pure, dependency-free TS module in `src/core/`.
+Core product logic is now substantially built and fully tested. Loop #4 acted on Review 2 ("use multiple subagents") by dispatching **2 parallel implementation subagents** (disjoint file ownership): the demo simulator and the time-window/heatmap aggregation. Combined with the privacy core from loop #3, the entire **non-UI domain layer** of the app exists and is verified: **`npm test` → 42/42 pass**, fully offline, no external deps.
 
 ## Snapshot
-- Tasks: candidates 3 · ready 0 · active 0 · done 1
+- Tasks: candidates 2 · ready 0 · active 0 · done 2
 - Issues: pending 0 · approved 1 · rejected 0
-- Reviews: 0 pending (1 processed)
-- PRD/GOAL: in sync · Preferences: seeded (stack + code-first + privacy rules)
-- Issue gate: 0/5 pending — clear
-- config: refresh_minutes changed 5 → 3 (cadence now 180s)
+- Reviews: 0 pending (2 processed)
+- Code: `src/core/{geohash,privacy,aggregate}.ts` + `src/sim/simulator.ts` (+ tests), 42 tests green
+- PRD/GOAL: in sync · Preferences: stack, code-first, **subagent parallelism**, privacy rules
+- Issue gate: 0/5 — clear · config: refresh_minutes=3 (180s cadence)
 
 ## Now / Next
-- **Plan + implement next**: TASK-202606131232 (demo simulator) and TASK-202606131233 (app scaffold + map) — both now unblocked (platform approved) and can consume `src/core/`. Build the Vite + map UI scaffold so the core is visible.
-- Then TASK-202606131234 (time/history scrub).
+- **TASK-202606131233 (web scaffold + map UI)** is the critical path: Vite + open-source map lib (Leaflet/MapLibre), render `densityGrid`/signal dots from the core, wire the demo simulator + a scrubber + heatmap toggle, hotkey to fire `triggerSignal`. This needs `npm install` (network) — verify network availability first; if blocked, fall back to a no-build, dependency-free canvas/SVG renderer.
+- **TASK-202606131234**: data layer done (`aggregate.ts`); remaining work is the UI scrubber/heatmap inside the scaffold.
 
 ## Blocked
-- None. Platform decision resolved; no open issues.
+- None in the vault. The only open risk is whether `npm install` (network) is available for the map UI — to be probed next loop.

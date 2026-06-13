@@ -9,6 +9,7 @@ _Durable conventions/decisions the loop applies every iteration. Maintained by `
 
 ## Working style
 - **Code-first**: prioritize shipping runnable, tested code over additional planning/docs (user feedback, [Review 1](../Reviews/processed/Review%201.md)). _How to apply:_ once a task is plannable, move to Implementation quickly; don't accumulate planning artifacts.
+- **Parallelize with subagents**: dispatch independent work (planning, review, and non-colliding implementation) as multiple subagents to accelerate (user feedback, [Review 2](../Reviews/processed/Review%202.md)). _How to apply:_ give each subagent **disjoint file ownership** to avoid collisions (or use git worktrees if files overlap); keep parallel work **verifiable offline** (pure modules + `node:test`); the orchestrator re-runs the **full** suite to verify integration rather than trusting subagent self-reports.
 
 ## Privacy implementation rules (from TASK-202606131231)
 - Jitter must be a **uniform-random point within the geohash cell**, never center-biased (leaks center) and never a fixed offset (subtractable). Draw randomness **independently per signal** so repeated signals from one location scatter across the cell (defeats triangulation).
