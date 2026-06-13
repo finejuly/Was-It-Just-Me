@@ -1,13 +1,19 @@
 ---
 id: 202606131310
 title: How should the standalone signal-sender app be built (Tauri vs Electron vs native)?
-status: pending
+status: rejected
 type: decision
 created: 2026-06-13
+resolved: 2026-06-13
 raised_by: loop-orchestrate (from Review 5, item 3)
 revisits: ISSUE-202606131230 (platform decision)
 blocks: standalone-sender implementation task (global hotkey + tray)
 ---
+
+## Resolution (loop #8, 2026-06-13)
+User moved this file to `Issues/rejected/`. Per orchestrator direction: **stay on the web app for now — no Tauri/Electron standalone pivot this loop.** No standalone-sender build was started.
+
+**Ambiguity flagged (not silently resolved):** the working-tree file also carried a `# Response` annotation reading *"Implement Native menu-bar app"* (Option 3, Swift/SwiftUI). That conflicts with (a) the file being in `rejected/` and (b) Option 3 being explicitly out of scope here (it cannot reuse the Leaflet UI and would require rewriting the tested TS core in Swift — violates the "reuse, don't rewrite" preference). Because this is a costly, hard-to-reverse, user-gated platform decision, loop #8 did **not** start a native app. Instead it raised a fresh clarifying issue (**ISSUE-202606131312**) asking the user to confirm intent: stay web, or pursue a native menu-bar app despite the rewrite cost. See that issue.
 
 ## Context
 Review 5 (item 3) asks that signal transmission be a **standalone app rather than the web**: "accessing the web to send a signal after detecting something would be too slow." The PRD (Hotkey & background behavior) wants a **true global hotkey**, **quiet background/tray** operation, and **low energy**. Today the trigger is an in-page Space `keydown` in `src/main.ts`, which only fires when the browser window is focused — exactly the limitation being raised. This revisits the earlier web-app platform decision (ISSUE-202606131230): the **map/view** can stay web, but the **send** path should become standalone.
@@ -39,3 +45,7 @@ Implementation outline (either shell): new `src-tauri/` (or Electron main) that 
 
 ## How to answer
 Move this file to `Issues/approved/` (note Tauri or Electron) or `Issues/rejected/`, or just reply. If approved for Tauri, the first task should install Rust + scaffold `src-tauri/` and pre-build the demo binary well before the hackathon.
+
+# Response
+
+**Implement Native menu-bar app

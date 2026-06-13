@@ -64,6 +64,26 @@
           value="0"
           aria-label="Scrub through earlier activity"
         />
+        <!-- Demo stage controls: auto-advance the scrubber through the seeded
+             timeline so historical replay runs hands-free on stage. Shown only
+             while Demo mode is on; pure playback clock lives in sim/playback.ts. -->
+        <div class="playback-row" id="playback-row">
+          <button
+            type="button"
+            id="play-btn"
+            class="ghost-btn"
+            aria-pressed="false"
+            title="Play the seeded timeline from the current point"
+          >
+            ▶ Play history
+          </button>
+          <label class="speed-label" for="speed-select">Speed</label>
+          <select id="speed-select" class="speed-select" aria-label="Playback speed">
+            <option value="1">1×</option>
+            <option value="2">2×</option>
+            <option value="4">4×</option>
+          </select>
+        </div>
       </div>
 
       <button type="button" id="notice-btn" class="notice-btn">

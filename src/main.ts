@@ -8,6 +8,10 @@
 
 import "leaflet/dist/leaflet.css";
 import { triggerSignal, generateScenario } from "./sim/simulator.ts";
+import {
+  advancePlayback,
+  type PlaybackSpeed,
+} from "./sim/playback.ts";
 import { inWindow, timeBounds } from "./core/aggregate.ts";
 import { transformSignal, type SignalRecord } from "./core/privacy.ts";
 import { SignalStore } from "./ui/store.ts";
@@ -39,6 +43,9 @@ const demoToggle = $<HTMLInputElement>("demo-toggle");
 const heatmapToggle = $<HTMLInputElement>("heatmap-toggle");
 const verifyToggle = $<HTMLInputElement>("verify-toggle");
 const verifyBanner = $<HTMLDivElement>("verify-banner");
+const playbackRow = $<HTMLDivElement>("playback-row");
+const playBtn = $<HTMLButtonElement>("play-btn");
+const speedSelect = $<HTMLSelectElement>("speed-select");
 
 // --- View state ----------------------------------------------------------
 // `live` true => follow the newest window. `live` false => show the window at
@@ -50,6 +57,87 @@ let live = true;
 // live here only transiently in-memory and are never persisted; the normal send
 // path immediately routes them through transformSignal (privacy on).
 let realFix: GeoFix | null = null;
+
+// --- Demo stage playback -------------------------------------------------
+// Auto-advances the scrubber through the seeded timeline so the operator can
+// show historical replay hands-free. The stepping math is the pure, tested
+// playback clock (sim/playback.ts); here we only own the ticker + DOM. Playback
+// is a demo-only convenience and starts OFF (no auto-motion until the operator
+// presses Play); it never touches the privacy path — it just moves the view.
+const PLAYBACK_TICK_MS = 100; // smooth-enough cursor without busy work
+let playTimer: number | undefined;
+let playSpeed: PlaybackSpeed = 1;
+let lastTickAt = 0;
+let carryMs = 0;
+
+function isPlaying(): boolean {
+  return playTimer !== undefined;
+}
+
+function setPlayLabel(): void {
+  playBtn.textContent = isPlaying() ? "⏸ Pause" : "▶ Play history";
+  playBtn.setAttribute("aria-pressed", String(isPlaying()));
+}
+
+function stopPlayback(): void {
+  if (playTimer !== undefined) {
+    window.clearInterval(playTimer);
+    playTimer = undefined;
+  }
+  setPlayLabel();
+}
+
+function tickPlayback(): void {
+  const max = Number(scrubber.max);
+  const now = Date.now();
+  const elapsed = now - lastTickAt;
+  lastTickAt = now;
+
+  const { step, reachedEnd, carryMs: carry } = advancePlayback(
+    Number(scrubber.value),
+    max,
+    playSpeed,
+    elapsed,
+    carryMs,
+  );
+  carryMs = carry;
+  scrubber.value = String(step);
+  // While playing we are in historical replay; only the final frame is "live".
+  live = step >= max;
+  refresh(store.all());
+
+  if (reachedEnd) {
+    // Loop the seeded scenario so an unattended stage demo keeps cycling.
+    stopPlayback();
+    window.setTimeout(() => {
+      if (!demoToggle.checked) return; // demo was turned off meanwhile
+      scrubber.value = "0";
+      live = false;
+      refresh(store.all());
+      startPlayback();
+    }, 900);
+  }
+}
+
+function startPlayback(): void {
+  if (isPlaying()) return;
+  // Begin from the start of history if we're already sitting at live, so Play
+  // always shows the lead-up rather than doing nothing at the end.
+  if (Number(scrubber.value) >= Number(scrubber.max)) {
+    scrubber.value = "0";
+    live = false;
+  }
+  carryMs = 0;
+  lastTickAt = Date.now();
+  playTimer = window.setInterval(tickPlayback, PLAYBACK_TICK_MS);
+  setPlayLabel();
+  refresh(store.all());
+}
+
+function togglePlayback(): void {
+  if (isPlaying()) stopPlayback();
+  else startPlayback();
+}
 
 function loadDemo(): void {
   // Stamp the scenario across the recent past so "live" shows current activity
@@ -198,13 +286,26 @@ async function setVerificationMode(on: boolean): Promise<void> {
 store.subscribe(refresh);
 
 scrubber.addEventListener("input", () => {
+  // A manual scrub takes over from auto-playback.
+  stopPlayback();
   live = Number(scrubber.value) >= Number(scrubber.max);
   refresh(store.all());
 });
 
 liveBtn.addEventListener("click", () => {
+  stopPlayback();
   live = true;
   refresh(store.all());
+});
+
+playBtn.addEventListener("click", togglePlayback);
+
+speedSelect.addEventListener("change", () => {
+  const v = Number(speedSelect.value);
+  playSpeed = (v === 2 || v === 4 ? v : 1) as PlaybackSpeed;
+  // Reset the sub-step carry so the new speed takes effect cleanly.
+  carryMs = 0;
+  lastTickAt = Date.now();
 });
 
 noticeBtn.addEventListener("click", sendSignal);
@@ -228,8 +329,10 @@ verifyToggle.addEventListener("change", () => {
 });
 
 demoToggle.addEventListener("change", () => {
+  stopPlayback();
   if (demoToggle.checked) {
     loadDemo();
+    playbackRow.hidden = false;
     showConfirm("Demo scenario loaded.");
   } else {
     // Leaving demo mode clears the staged scenario; only live-sent signals
@@ -237,6 +340,8 @@ demoToggle.addEventListener("change", () => {
     // clean slate we empty the set so the map reflects real send activity only.
     store.set([]);
     live = true;
+    // Playback only makes sense over the seeded timeline; hide it without demo.
+    playbackRow.hidden = true;
     showConfirm("Demo cleared — send a signal to see it appear.");
   }
 });
@@ -245,6 +350,11 @@ demoToggle.addEventListener("change", () => {
 // Verification mode must always start OFF regardless of any cached form state.
 verifyToggle.checked = false;
 verifyBanner.hidden = true;
+// Playback is demo-only and starts paused; show its controls iff demo is on.
+playSpeed = 1;
+speedSelect.value = "1";
+setPlayLabel();
+playbackRow.hidden = !demoToggle.checked;
 mapView.setShowDensity(heatmapToggle.checked);
 loadDemo();
 // Try to center on the user's real location (non-blocking; demo shows meanwhile).
