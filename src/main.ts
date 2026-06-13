@@ -385,6 +385,28 @@ speedSelect.addEventListener("change", () => {
 
 noticeBtn.addEventListener("click", sendSignal);
 
+// --- Native shell bridge (Tauri only; no-op in the browser) --------------
+// When this same web app runs inside the Tauri desktop shell (src-tauri/), the
+// system tray "I noticed something" item and the OS-global shortcut
+// (Cmd/Ctrl+Shift+Space) each emit a `wijm://notice` event. We listen for it and
+// call the UNCHANGED `sendSignal()` — so the native background send is byte-for-
+// byte the in-page Space-hotkey path (privacy applied there, never natively).
+//
+// Guarded so the plain browser build is completely unaffected: we only touch the
+// Tauri API when the Tauri runtime is present, and we import it dynamically so
+// the browser bundle never hard-depends on it at load. Decision: ISSUE-...1317.
+const NATIVE_NOTICE_EVENT = "wijm://notice";
+function isTauri(): boolean {
+  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+}
+if (isTauri()) {
+  void import("@tauri-apps/api/event")
+    .then(({ listen }) => listen(NATIVE_NOTICE_EVENT, () => sendSignal()))
+    .catch(() => {
+      /* Tauri API unavailable: stay a pure browser app (no native send). */
+    });
+}
+
 window.addEventListener("keydown", (e) => {
   // Spacebar hotkey — but not while typing in a field or toggling a control.
   if (e.code !== "Space") return;

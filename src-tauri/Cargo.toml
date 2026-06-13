@@ -1,0 +1,47 @@
+# Tauri v2 desktop shell for "Was It Just Me?".
+#
+# This crate is ONLY a thin native host: it shows the existing web app in a
+# webview and adds a system tray + a true OS-global shortcut. It contains NO
+# privacy logic and NO location math — the tray/shortcut merely emit a
+# "wijm://notice" event that the unchanged web `sendSignal()` path handles.
+# All privacy (jitter + bucketing via `transformSignal`) lives in the web code.
+#
+# NOTE: building this needs the Rust toolchain (rustup/cargo), which is NOT yet
+# installed on the dev machine. Authoring is committed now; `tauri dev`/`build`
+# is gated on the user installing Rust (see ISSUE-202606131318).
+
+[package]
+name = "was-it-just-me"
+version = "0.0.1"
+description = "Privacy-preserving neighborhood signal map — desktop shell"
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+# Tauri v2 keeps app logic in a lib so mobile targets can reuse it; the bin is a
+# thin entry point. Desktop-only here, but we follow the standard v2 layout.
+name = "was_it_just_me_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "was-it-just-me"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# `tray-icon` brings in the system-tray APIs; default features cover the webview.
+tauri = { version = "2", features = ["tray-icon"] }
+# True OS-global shortcut (fires while the app is unfocused/backgrounded).
+tauri-plugin-global-shortcut = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+# Smaller bundle for the hackathon demo.
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
