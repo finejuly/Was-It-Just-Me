@@ -54,3 +54,12 @@ regardless — the native shell is the "true background hotkey" flourish.
 Rebuild, run steps 2–5, and **approve option 1** if the map window now appears. Only if
 it still doesn't surface do we need Review 7 with the new observations.
 </content>
+
+
+# Response
+
+Still nothing.
+
+When I tried `"src-tauri/target/release/bundle/macos/Was It Just Me.app/Contents/MacOS/"*`, I got
+
+`[wijm] desktop shell exited with error: failed to initialize plugin `global-shortcut`: Error deserializing 'plugins.global-shortcut' within your Tauri configuration: invalid type: map, expected unit`
