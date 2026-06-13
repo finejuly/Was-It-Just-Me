@@ -1,19 +1,21 @@
 # Progress
 
-_Last updated: 2026-06-13 12:31_
+_Last updated: 2026-06-13 12:37_
 
 ## Status
-Loop is initialized and running. Loop #1 (genesis) ran Discovery against the seeded PRD/GOAL: raised the blocking platform decision and seeded the initial candidate backlog aligned to the demo-spine milestones (M1–M5). No product code exists yet; no implementation dispatched this loop.
+Loop #2 ran Planning: promoted the privacy spine (TASK-202606131231, signal core + privacy transform) from candidate → ready with a language-agnostic algorithm design and testable acceptance criteria. The platform decision (ISSUE-202606131230) is still pending the user; implementation in a concrete stack is gated on it, but the privacy design/test spec is language-independent and ready.
 
 ## Snapshot
-- Tasks: candidates 4 · ready 0 · active 0 · done 0
+- Tasks: candidates 3 · ready 1 · active 0 · done 0
 - Issues: pending 1 · approved 0 · rejected 0
 - PRD/GOAL: in sync (seeded 2026-06-13)
-- Issue gate: 1/5 pending — clear (implementation not blocked by gate)
+- Issue gate: 1/5 pending — clear
 
 ## Now / Next
-- **Awaiting user**: resolve ISSUE-202606131230 (target platform) → move to `Issues/approved/` or `Issues/rejected/`. This unblocks TASK-...233 (scaffold+map) and TASK-...234 (time/history).
-- **Plannable now (platform-independent)**: TASK-...231 (signal core + privacy transform) and TASK-...232 (demo simulator) can be promoted by `loop-plan` next loop without waiting on the platform decision.
+- **Awaiting user**: resolve ISSUE-202606131230 (target platform). This picks the language/runtime and unblocks both planning of TASK-...233/...234 and *implementation* of all tasks.
+- **Plannable next loop**: TASK-202606131232 (demo simulator) — also platform-independent in design.
+- **Implementation**: holds until a stack is chosen (even platform-independent cores need a language); `loop-implement` will run once ISSUE-...230 is approved.
 
 ## Blocked
-- TASK-202606131233 and TASK-202606131234 are blocked by ISSUE-202606131230 (platform decision).
+- TASK-202606131233, TASK-202606131234 — blocked by ISSUE-202606131230 (platform decision).
+- Implementation of TASK-202606131231 — design-complete, but needs the language/runtime from ISSUE-202606131230.
