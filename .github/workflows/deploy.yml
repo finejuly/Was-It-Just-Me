@@ -1,0 +1,54 @@
+# Build the Vite web app and deploy it to GitHub Pages.
+#
+# "Was It Just Me?" is a static single-page app (the web app is the demo spine;
+# the Tauri desktop shell is a separate, optional native flourish). `npm run
+# build` emits a fully static `dist/` with relative asset paths (vite base "./"),
+# so it hosts anywhere — here we publish it to GitHub Pages.
+#
+# One-time setup after the repo exists: Settings → Pages → Build and deployment →
+# Source = "GitHub Actions". Then every push to main publishes the site at
+# https://<user>.github.io/<repo>/.
+name: Deploy web app to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Allow this workflow to publish to Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One concurrent deploy; newer pushes supersede in-flight runs.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
