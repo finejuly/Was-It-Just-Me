@@ -1,26 +1,30 @@
 # Progress
 
-_Last updated: 2026-06-13 (loop #8)_
+_Last updated: 2026-06-13 (loop #9)_
 
 ## Status
-Staying on the **web app** — the standalone-sender pivot (ISSUE-...1310) was rejected by the user (moved to `Issues/rejected/`). Loop #8 shipped the next demo-spine increment: **demo-mode stage playback** (Play/Pause + 1×/2×/4× speed) that auto-advances the seeded historical timeline, so "historical replay" runs hands-free on stage (GOAL M5). Stepping logic is a new pure, tested module; UI owns only the ticker. Tests up to 50/50.
+Started the approved **native macOS menu-bar sender** (TASK-...1313). Loop #9 built **increment A** — the privacy bridge that lets the Swift app reuse the **unchanged, tested TS privacy core** through JavaScriptCore, so Swift writes **zero** privacy logic (honors "reuse, don't rewrite" + the highest-priority privacy guarantee). The **JS half is done and verified offline**; the **Swift half is written but cannot be built here** due to a machine-level toolchain skew.
 
-A genuine conflict was surfaced rather than guessed: the rejected ISSUE-...1310 file also carried a hand-written note "Implement Native menu-bar app" (Option 3). Loop #8 did **not** start a native app; it raised **ISSUE-...1312** to confirm intent. **The user then answered in real time** — moved ...1312 to `Issues/approved/` with `# Response: Native`. **Decision is now unambiguous: build the native macOS menu-bar app** (Swift/SwiftUI `NSStatusItem`, true global hotkey + tray) for the *send* path, accepting the rewrite cost; the web app stays the map/view + instant fallback. This is a large multi-step build, so it is queued for loop #9 (TASK-...1313), not rushed into the tail of this iteration.
+- **JS bridge (green):** `src/core/bridge.ts` exposes a narrow `WIJM.transformSignal` with injected rng+id (JSC lacks Web Crypto). `npm run build:core` esbuild-bundles the core to a classic IIFE script (`native/WIJMCore/.../Resources/wijm-core.js`, 4KB, no ESM, no runtime deps). New `src/core/bridge.test.ts` pins the exact contract Swift calls + privacy invariants. **Tests 50 → 57**; typecheck + build green; **web app untouched**.
+- **Swift (written, unverified):** `native/WIJMCore/` SwiftPM package (JSC only) — `SignalCore.swift` loads the bundle into a `JSContext`, injects `SecRandomCopyBytes` rng + UUID, decodes + asserts the six-field schema at the boundary; XCTest parity suite mirrors `privacy.test.ts`.
+- **Blocker (raised, not guessed):** `swift build`/`swift test` fail with an SDK-vs-compiler skew (SDK `swiftlang-6.2.1.4.7` vs compiler `...4.8`) that breaks **all** Swift compilation — proven with a trivial empty package *and* a one-file `swiftc` build, so it is **not** a defect in our code. Raised **ISSUE-...1314** asking the user to realign the Command Line Tools (or defer the native build for the hackathon).
 
 ## Snapshot
-- Tasks: candidates 2 (TASK-...234 history/heatmap UX; TASK-...1313 native menu-bar sender) · ready 0 · active 0 · done 5
-- Issues: pending 0 · approved 3 (incl. ISSUE-...1312 native) · rejected 2 (ISSUE-...1302 offline basemap, ISSUE-...1310 standalone-app framing)
+- Tasks: candidates 2 (TASK-...234 history/heatmap UX; TASK-...1315 native GUI+hotkey [inc. B]) · ready 0 · **active 1 (TASK-...1313 — JS half green, Swift blocked)** · done 5
+- Issues: **pending 1 (ISSUE-...1314 toolchain skew)** · approved 3 · rejected 2
 - Reviews: 0 pending (5 processed)
-- App: builds; `npm run dev` → http://localhost:5173/ ; **tests 50/50**; geolocation + verification mode (off by default) + demo stage playback added
-- Issue gate: 0/10 — clear · config: refresh_minutes=3, unanswered_issue_limit=10
+- App: web app builds; `npm run dev` → http://localhost:5173/ ; **tests 57/57** (+7 bridge contract); `npm run build:core` produces the JSC bundle. Native package present but unbuildable until the toolchain is fixed.
+- Issue gate: **1/10 — clear** · config: refresh_minutes=1, unanswered_issue_limit=10
 
 ## Now / Next
-- **Loop #9 (top priority)**: plan + start **TASK-...1313 — native menu-bar sender** (approved). Plan must preserve the tested privacy guarantee (prefer embedding JavaScriptCore / a `WKWebView` over rewriting the core); add a global hotkey + tray; keep the web app as fallback. No Rust needed (Swift 6.2 + Xcode CLT present).
-- **User**: live-test the web app at http://localhost:5173/ — Demo mode → press **Play history**, try 2×/4×, scrub manually (should pause), "Back to live"; plus the earlier geolocation + Verification-mode check.
-- **Remaining web polish**: history/heatmap UX (TASK-...234).
+- **User (decision needed)**: answer **ISSUE-...1314** — realign the Swift toolchain (Option 2 if Xcode.app is installed: `xcode-select -s /Applications/Xcode.app/...`; else reinstall CLT), or defer the native sender and ship the web demo. Resolve before loop #10 can verify the Swift half.
+- **Loop #10 (if toolchain fixed)**: run `cd native/WIJMCore && swift build && swift test` (expected green — the JS contract is already verified), then mark TASK-...1313 **done** and plan/start increment B (TASK-...1315: NSStatusItem GUI + global hotkey + IPC to web map).
+- **Loop #10 (if toolchain deferred)**: keep the Swift bridge in-tree; pivot to remaining **web polish** — history/heatmap UX (TASK-...234) — so the loop stays productive on the working demo.
+- **User live-test (web app, still the demo spine)**: http://localhost:5173/ — Demo mode → Play history (2×/4×), manual scrub, Back to live; geolocation + Verification-mode (off by default).
 
 ## Blocked
-- None. Native-sender decision is approved and ready to plan.
+- **TASK-...1313 Swift verification** — blocked by **ISSUE-...1314** (toolchain SDK/compiler skew; user action required). JS half is unblocked and green.
+- **TASK-...1315** (increment B) — blocked by TASK-...1313 going green (and thus by ISSUE-...1314).
 
 ## Note on loop durability
-Loop is **session-scoped**: advances only while this session is active; idles/closes stop it. A fixed-interval cron (`*/3 * * * *`) is more robust within a running session — switchable on request.
+Loop is **session-scoped**: advances only while this session is active; idles/closes stop it. Config is now `refresh_minutes=1`. A fixed-interval cron is more robust within a running session — switchable on request.
