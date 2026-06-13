@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Was It Just Me?</title>
+    <!-- Leaflet CSS pinned to the same version as the leaflet dep. The map still
+         renders dots if tiles fail to load; tiles are purely cosmetic. -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <h1>Was it just me?</h1>
+          <p class="tagline">See whether anyone nearby noticed something too.</p>
+        </div>
+        <div class="controls">
+          <label class="toggle">
+            <input type="checkbox" id="demo-toggle" checked />
+            <span>Demo mode</span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" id="heatmap-toggle" checked />
+            <span>Density view</span>
+          </label>
+        </div>
+      </header>
+
+      <div id="map" aria-label="Neighborhood signal map"></div>
+
+      <div class="time-panel">
+        <div class="time-row">
+          <span class="time-label" id="time-mode">Live</span>
+          <span class="time-readout" id="time-readout">—</span>
+          <button type="button" id="live-btn" class="ghost-btn">Back to live</button>
+        </div>
+        <input
+          type="range"
+          id="scrubber"
+          min="0"
+          max="0"
+          step="1"
+          value="0"
+          aria-label="Scrub through earlier activity"
+        />
+      </div>
+
+      <button type="button" id="notice-btn" class="notice-btn">
+        <span class="notice-main">I noticed something</span>
+        <span class="notice-sub">or press the spacebar</span>
+      </button>
+
+      <div id="confirm" class="confirm" role="status" aria-live="polite"></div>
+
+      <p class="reassure" id="reassure">
+        These dots are deliberately blurred — they show that people nearby noticed
+        something, never where anyone is or what happened.
+      </p>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -5,6 +5,18 @@
   "type": "module",
   "description": "Privacy-preserving neighborhood signal map — \"Was It Just Me?\"",
   "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview",
     "test": "node --test 'src/**/*.test.ts'"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.12",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4"
   }
 }

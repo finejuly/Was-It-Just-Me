@@ -1,0 +1,232 @@
+/* "Was It Just Me?" — calm, reassuring, never alarmist.
+   Soft blues/greens, generous spacing, gentle motion. No reds, no sirens. */
+
+:root {
+  --bg: #f3f6f8;
+  --panel: #ffffff;
+  --ink: #1f2a33;
+  --ink-soft: #5c6b75;
+  --accent: #3a7d8c; /* muted teal — "noticing", not "alarm" */
+  --accent-soft: #6fb3bf;
+  --dot: #4a90a4;
+  --shadow: 0 6px 24px rgba(31, 42, 51, 0.12);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+#app {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top bar -------------------------------------------------------------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  z-index: 1000;
+  flex-wrap: wrap;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.tagline {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.controls {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+
+/* Map ------------------------------------------------------------------ */
+#map {
+  flex: 1;
+  width: 100%;
+  /* Fallback background so the map area reads as "ground" even if OSM tiles
+     never load — functionality (dots) does not depend on tiles. */
+  background: linear-gradient(135deg, #e7eef0 0%, #dde8ea 100%);
+  z-index: 1;
+}
+
+/* Privacy-randomized dots. Rendered via Leaflet circleMarker, but we style
+   the heatmap circles here for a soft, blurred-crowd feel. */
+.signal-dot {
+  filter: drop-shadow(0 0 3px rgba(74, 144, 164, 0.5));
+}
+
+/* Time panel ----------------------------------------------------------- */
+.time-panel {
+  padding: 12px 20px;
+  background: var(--panel);
+  box-shadow: 0 -4px 18px rgba(31, 42, 51, 0.08);
+  z-index: 1000;
+}
+
+.time-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.time-label {
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 64px;
+}
+
+.time-readout {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  flex: 1;
+}
+
+.ghost-btn {
+  border: 1px solid var(--accent-soft);
+  background: transparent;
+  color: var(--accent);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ghost-btn:hover {
+  background: rgba(58, 125, 140, 0.08);
+}
+
+.ghost-btn[hidden] {
+  display: none;
+}
+
+#scrubber {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+/* Primary "I noticed something" action -------------------------------- */
+.notice-btn {
+  position: absolute;
+  left: 50%;
+  bottom: 110px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 16px 34px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 8px 28px rgba(58, 125, 140, 0.45);
+  cursor: pointer;
+  z-index: 1000;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.notice-btn:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 12px 32px rgba(58, 125, 140, 0.5);
+}
+
+.notice-btn:active {
+  transform: translateX(-50%) translateY(1px) scale(0.98);
+}
+
+.notice-main {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.notice-sub {
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+/* Quiet, non-modal confirmation --------------------------------------- */
+.confirm {
+  position: absolute;
+  left: 50%;
+  bottom: 184px;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(31, 42, 51, 0.88);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 1001;
+}
+
+.confirm.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Reassuring footnote -------------------------------------------------- */
+.reassure {
+  margin: 0;
+  padding: 10px 20px 14px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  text-align: center;
+  background: var(--panel);
+  z-index: 1000;
+}
+
+@media (max-width: 560px) {
+  .tagline {
+    display: none;
+  }
+  .notice-btn {
+    bottom: 96px;
+  }
+}
