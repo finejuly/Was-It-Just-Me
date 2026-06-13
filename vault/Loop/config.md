@@ -1,2 +1,2 @@
 refresh_minutes: 3
-unanswered_issue_limit: 5
+unanswered_issue_limit: 10

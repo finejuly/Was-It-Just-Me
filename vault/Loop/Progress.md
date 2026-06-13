@@ -1,21 +1,22 @@
 # Progress
 
-_Last updated: 2026-06-13 12:46_
+_Last updated: 2026-06-13 13:01_
 
 ## Status
-Core product logic is now substantially built and fully tested. Loop #4 acted on Review 2 ("use multiple subagents") by dispatching **2 parallel implementation subagents** (disjoint file ownership): the demo simulator and the time-window/heatmap aggregation. Combined with the privacy core from loop #3, the entire **non-UI domain layer** of the app exists and is verified: **`npm test` → 42/42 pass**, fully offline, no external deps.
+**The app is runnable and user-testable.** Loop #6 built the web UI (TASK-202606131233, Vite + TS + Leaflet) wiring the tested core/sim/aggregate modules, verified it (typecheck + build + 42 tests), and **launched the dev server at http://localhost:5173/**. Acting on Review 4, prioritized reaching a testable build and proactively raised two decision issues. The end-to-end demo spine (privacy core → simulator → map + density + scrubber + hotkey send) now exists.
 
 ## Snapshot
-- Tasks: candidates 2 · ready 0 · active 0 · done 2
-- Issues: pending 0 · approved 1 · rejected 0
-- Reviews: 0 pending (3 processed)
-- Code: `src/core/{geohash,privacy,aggregate}.ts` + `src/sim/simulator.ts` (+ tests), 42 tests green
-- PRD/GOAL: in sync · Preferences: stack, code-first, **subagent parallelism + worktree isolation**, privacy rules
-- Issue gate: 0/5 — clear · config: refresh_minutes=3 (180s cadence)
+- Tasks: candidates 1 (TASK-...234 UI remainder) · ready 0 · active 0 · done 3
+- Issues: pending 2 (demo location ...1301, offline basemap ...1302) · approved 1 · rejected 0
+- Reviews: 0 pending (4 processed)
+- App: builds (`dist/`), `npm run dev` → http://localhost:5173/ ; tests 42/42
+- Issue gate: 2/5 — clear
+- config: refresh_minutes=3 (180s cadence)
 
 ## Now / Next
-- **TASK-202606131233 (web scaffold + map UI)** is the critical path: Vite + open-source map lib (Leaflet/MapLibre), render `densityGrid`/signal dots from the core, wire the demo simulator + a scrubber + heatmap toggle, hotkey to fire `triggerSignal`. This needs `npm install` (network) — verify network availability first; if blocked, fall back to a no-build, dependency-free canvas/SVG renderer.
-- **TASK-202606131234**: data layer done (`aggregate.ts`); remaining work is the UI scrubber/heatmap inside the scaffold.
+- **User testing**: please open http://localhost:5173/ and give practical feedback (drop notes in `vault/Reviews/`).
+- **Awaiting decisions**: ISSUE-...1301 (demo location/scenario), ISSUE-...1302 (offline basemap).
+- **Next build**: TASK-202606131234 UI remainder is largely covered (scrubber + density shipped in the scaffold); a focused pass on history/live UX polish + heatmap visualization is the main remaining product work. Background/global-hotkey (desktop) is out of scope for the web MVP unless revisited.
 
 ## Blocked
-- None in the vault. The only open risk is whether `npm install` (network) is available for the map UI — to be probed next loop.
+- None. Two open decision issues are advisory (don't block testing).

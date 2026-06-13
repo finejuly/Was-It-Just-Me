@@ -1,1 +1,0 @@
-For each subagent for a task, consider to use worktree to avoid potential conflict.
