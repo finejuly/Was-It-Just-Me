@@ -55,4 +55,7 @@ rethink the Tauri direction. Then the next loop scaffolds TASK-...1316 according
 # Response
 
 1. I don't know.
-2. 
+2. a
+3. Agree.
+4. It should keep running.
+5. MacOS for now.
