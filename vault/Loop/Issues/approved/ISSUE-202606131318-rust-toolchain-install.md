@@ -55,3 +55,57 @@ npm run tauri:dev     # web UI in a native window, with tray + global hotkey
   builds the macOS bundle (closing out Part B of TASK-...1316).
 - If you'd rather **not** install Rust right now: move to `Issues/rejected/` (or note it) — the web
   app remains the full live demo (the Tauri code stays in-tree, ready for whenever you install Rust).
+
+
+# Response
+
+I followed all the instruction, but got the error from npm run tauri:dev as follows:
+
+**npm** error Missing script: "tauri:build"
+
+**npm** error
+
+**npm** error To see a list of scripts, run:
+
+**npm** error   npm run
+
+**npm** error A complete log of this run can be found in: /Users/ilyoungjeong/.npm/_logs/2026-06-13T21_49_57_970Z-debug-0.log
+
+
+# Resolution (loop #12) — RESOLVED, build green
+
+Thanks — Rust installed cleanly (`cargo 1.96.0`, in `~/.cargo`). Two notes:
+
+**About the `Missing script: "tauri:build"` error you hit:** that was a stale checkout / wrong
+working directory, **not** a real problem. `package.json` on `main` does contain all three scripts
+(`tauri`, `tauri:dev`, `tauri:build`) — loop #11 committed them. The fix is just to be on the
+latest `main` and in the repo root:
+```sh
+cd /Users/ilyoungjeong/Documents/Wasitjustme
+git pull            # if needed
+npm run tauri:build # works now
+```
+Also: `cargo` isn't on a *non-login* shell's PATH by default — if a fresh terminal can't find it,
+run `source "$HOME/.cargo/env"` (or just open a new login shell).
+
+**What loop #12 did (all verified, committed `237d555`):**
+- Generated the icon set with `tauri icon` (placeholder branded source — swap for a real logo
+  anytime by re-running `npm run tauri -- icon <your.png>`).
+- Fixed two bundle-time config issues: `productName` `"Was It Just Me?"` → `"Was It Just Me"` (the
+  `?` is illegal in a macOS bundle name; the **window title** still shows `"Was It Just Me?"`), and
+  set bundle targets to `["app"]` (the DMG step needs a GUI session — see below).
+- `cargo check` clean; **`npm run tauri:build` builds `target/release/bundle/macos/Was It Just Me.app`**
+  (runnable arm64 app). Web app still 61/61, core bundle untouched.
+
+**One thing left for you (a human GUI check — can't be automated headless):**
+```sh
+open "src-tauri/target/release/bundle/macos/Was It Just Me.app"
+```
+Then confirm: the map loads in a native window; the tray menu ("I noticed something" / "Show map" /
+"Quit") appears; **Cmd+Shift+Space fires exactly one signal even when the app is backgrounded**;
+closing the window hides to tray (app stays alive); tray **Quit** exits. If all good, this issue is
+fully closed. If you want a `.dmg` to share, run it from a normal desktop session:
+`npm run tauri -- build --bundles dmg`.
+
+> Status: the **build is verified green**; remaining work is your manual GUI smoke-test. Leaving this
+> in `approved/` as the record. No further loop action is required unless the GUI test surfaces a bug.

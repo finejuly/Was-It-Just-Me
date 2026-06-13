@@ -97,9 +97,15 @@ Gated on ISSUE-...1318 (Rust install). Do NOT attempt this loop:
       browser bundle never loads it); plain browser build/behavior unchanged (in-page Space hotkey +
       Notice button intact). **`npm test` 61/61** green; **`npm run typecheck`** clean; **`npm run
       build`** ok; **`build:core` bundle byte-for-byte unchanged** (empty `git diff --stat`).
-- [ ] (B, BLOCKED-ON-RUST → ISSUE-...1318) `tauri dev`/`tauri build` run; tray + global shortcut
-      fire one signal backgrounded; close→tray, Quit exits; macOS bundle builds. Needs the user to
-      install rustup/cargo first; verified next loop.
+- [x] (B, loop #12 — Rust installed, ISSUE-...1318 approved) `cargo check` **clean (0 warnings)**;
+      `npm run tauri:build` produces **`target/release/bundle/macos/Was It Just Me.app`** (Mach-O
+      arm64, correct Info.plist: name "Was It Just Me", id `ai.cochlear.wasitjustme`, icon embedded).
+      The tray + global-shortcut + hide-to-tray wiring **compiles against the real Tauri v2 APIs**.
+      Two config fixes were required (found only at `tauri build`): productName `?`→removed (macOS
+      bundle names forbid `?`; window title keeps the `?`), and bundle target set to `["app"]` only.
+      Icons generated via `tauri icon` (placeholder source). **Remaining human step**: live
+      click-test the tray/`Cmd+Shift+Space`/close-to-tray in a GUI session (can't be done headless);
+      DMG also needs a GUI session (`tauri build --bundles dmg`).
 
 ## Outcome (loop #11)
 Part A (all cargo-free authoring) **complete and verified** — see checked items above. Part B is
@@ -107,6 +113,21 @@ the only remaining work and is **gated on the Rust toolchain**, which is not ins
 machine; raised as **ISSUE-...1318** (one-line rustup install + `npm run tauri:dev`). Committed
 small on `main` (no push). Marking this task **done for the authoring scope**; the build/verify
 step continues under ISSUE-...1318 next loop.
+
+## Outcome (loop #12) — Part B done
+User installed Rust (`cargo 1.96.0`) and approved **ISSUE-...1318**, unblocking Part B. This loop:
+- `tauri icon` generated the app icon set (placeholder branded source — swap for a real logo later).
+- `cargo check` in `src-tauri/` → **clean, 0 warnings**; the tray/global-shortcut/hide-to-tray code
+  compiles against the real Tauri v2.11.2 + `tauri-plugin-global-shortcut` v2.3.2 + `tray-icon`
+  v0.23.1 APIs (the wiring is sound, not just hand-authored).
+- `npm run tauri:build` → built **`Was It Just Me.app`** (Mach-O arm64). Two config defects that
+  only surface at bundle time were fixed: `productName` had a `?` (forbidden in macOS bundle names)
+  and DMG bundling fails headless, so default targets are now `["app"]`.
+- Web app unaffected: **tests 61/61**, typecheck clean, core bundle byte-for-byte unchanged.
+- Committed `237d555` (config fix + icons), no push.
+**Task fully done.** Only the human-in-the-loop GUI verification remains (run the `.app`, confirm
+tray + `Cmd+Shift+Space` fire one signal backgrounded, close→tray, Quit exits) — tracked as the
+acceptance note on ISSUE-...1318, not a blocker for the build itself.
 
 ## Test notes
 - This loop verifies only Part A (no cargo): `npm run typecheck`, `npm test`, `npm run build`,

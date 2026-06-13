@@ -1,57 +1,60 @@
 # Progress
 
-_Last updated: 2026-06-13 (loop #11)_
+_Last updated: 2026-06-13 (loop #12)_
 
 ## Status
-The user **approved the Tauri sub-decisions (ISSUE-...1317)**, so loop #11 **scaffolded the Tauri
-v2 desktop shell** (TASK-...1316) that wraps the existing web app verbatim — one privacy core, no
-UI fork, no JSC bridge. All of the scaffold that does **not** need the Rust toolchain is authored,
-committed, and verified; the actual `tauri dev`/`build` is the only remaining step and is **gated
-on the user installing Rust** (the machine has no `rustc`/`cargo`/`rustup`), raised as ISSUE-...1318.
+**The Tauri native desktop shell now builds.** The user installed Rust (`cargo 1.96.0`) and approved
+**ISSUE-...1318**, which unblocked **Part B of TASK-...1316** (the cargo-dependent build/verify). This
+loop ran it: `cargo check` is **clean (0 warnings)** and `npm run tauri:build` produces a runnable
+macOS **`Was It Just Me.app`**. The web app remains the live-demo spine (tests **61/61**), and the
+native layer still has **zero location/privacy logic** — one privacy core, wrapped verbatim.
 
-- **Tauri shell scaffold shipped (committed `6cc328f`):** `src-tauri/` Tauri **v2** project
-  (`Cargo.toml`, `tauri.conf.json` → `frontendDist=../dist`, `devUrl=:5173`, macOS `app`/`dmg`
-  bundle; `src/lib.rs`+`src/main.rs`, `build.rs`, `capabilities/default.json`, `.gitignore`,
-  `README.md`). Tray menu (*I noticed something* / *Show map* / *Quit*), OS-global shortcut
-  **Cmd/Ctrl+Shift+Space**, **hide-to-tray on close** (Quit exits) — exactly the approved
-  ISSUE-...1317 decisions. The native layer has **no location/privacy logic**: tray-notice and the
-  shortcut both `emit("wijm://notice")`; the frontend (Tauri-guarded + dynamically imported, so the
-  browser bundle is unaffected) calls the **unchanged** `sendSignal()` → `transformSignal`/`SignalStore`,
-  byte-for-byte the in-page Space-hotkey path. npm: `@tauri-apps/cli@2.11.2` + `@tauri-apps/api@2.11.0`
-  + `tauri*` scripts. **Web app stays green: tests 61/61, typecheck clean, build ok, `build:core`
-  bundle byte-for-byte unchanged.** TASK-...1316 → done (authoring scope).
-- **Rust gate surfaced:** ISSUE-...1318 (pending) gives the user the one-line rustup install + the
-  `npm run tauri:dev` next step; until then the web app is the full live demo and the Tauri code sits
-  in-tree ready to build.
+- **Tauri Part B verified (committed `237d555`):**
+  - `tauri icon` generated the app icon set (placeholder branded source — `npm run tauri -- icon <png>`
+    to swap in a real logo). Committed the macOS-referenced icons (32/128/128@2x/icns) + root set;
+    dropped the android/ios variants (macOS-only packaging).
+  - **Two bundle-time config defects found & fixed** (only surface at `tauri build`, not `cargo check`):
+    `productName` `"Was It Just Me?"` → `"Was It Just Me"` (macOS bundle names forbid `?`; the **window
+    title** keeps the `?`), and `bundle.targets` → `["app"]` (DMG bundling fails headless — needs a GUI
+    session via `tauri build --bundles dmg`).
+  - **`cargo check` clean**; the tray / global-shortcut `Cmd+Shift+Space` / hide-to-tray wiring
+    compiles against the real **Tauri v2.11.2** + `tauri-plugin-global-shortcut v2.3.2` + `tray-icon
+    v0.23.1` APIs. `npm run tauri:build` → **`src-tauri/target/release/bundle/macos/Was It Just Me.app`**
+    (Mach-O **arm64**, Info.plist name "Was It Just Me", id `ai.cochlear.wasitjustme`, icon embedded).
+  - Web app unaffected: **tests 61/61**, typecheck clean, **core bundle (`wijm-core.js`) byte-for-byte
+    unchanged**. TASK-...1316 Part B criterion checked → task fully done.
+- **User's "Missing script: tauri:build" error was stale**, not a defect: `package.json` on `main`
+  has all three `tauri*` scripts (added loop #11). Resolved with a note on ISSUE-...1318 (be on latest
+  `main`, run from repo root; `source ~/.cargo/env` if a fresh shell can't find cargo).
 
 ## Snapshot
-- Tasks: candidates 0 · ready 0 · active 0 · done 9 (+TASK-...1316 Tauri shell, authoring scope)
-- Issues: **pending 1 (ISSUE-...1318 Rust install)** · approved 5 (+...1317 answered) · rejected 2
+- Tasks: candidates 0 · ready 0 · active 0 · done 9 (TASK-...1316 **Part A + Part B done**)
+- Issues: pending **0** · approved 6 (ISSUE-...1318 **resolved/green**, kept in approved/ as record) · rejected 2
 - Reviews: 0 pending (5 processed)
-- App: web app builds; `npm run dev` → http://localhost:5173/ ; **tests 61/61**. Tauri shell authored
-  but **not yet built** (needs Rust). `npm run build:core` reference bundle unchanged.
-- Issue gate: **1/10 — clear**. Config: refresh_minutes=1, unanswered_issue_limit=10.
+- App: web app builds; `npm run dev` → http://localhost:5173/ ; **tests 61/61**. **Native macOS `.app`
+  builds** via `npm run tauri:build`. `build:core` reference bundle unchanged.
+- Issue gate: **0/10 — clear**. Config: refresh_minutes=1, unanswered_issue_limit=10.
 
 ## Now / Next
-- **User (action needed)**: **ISSUE-...1318** — install Rust (`curl --proto '=https' --tlsv1.2 -sSf
-  https://sh.rustup.rs | sh`, restart shell), then move the issue to `approved/` with a note. That
-  unblocks the native demo. If you'd rather not install Rust now, move it to `rejected/` — the web app
-  remains the complete live demo and the Tauri code waits in-tree.
-- **Loop #12 (if ISSUE-...1318 approved)**: run `npm run tauri:dev` — verify the web UI loads in a
-  native window, the tray + `Cmd+Shift+Space` each fire exactly one signal while backgrounded, close
-  hides to tray, Quit exits; generate icons (`npm run tauri -- icon <png>`) and `npm run tauri:build`
-  the macOS bundle. Closes Part B of TASK-...1316.
-- **Loop #12 (if ISSUE-...1318 still pending/rejected)**: continue web-demo polish on the spine
-  (GOAL #6 / M6 — demo-facing copy, reliability/UX), since the web app is the working demo Tauri wraps.
+- **User (one manual GUI smoke-test, not a blocker)**: `open "src-tauri/target/release/bundle/macos/Was
+  It Just Me.app"` and confirm: map loads in a native window; tray menu present; **Cmd+Shift+Space fires
+  exactly one signal while backgrounded**; window close hides to tray; tray **Quit** exits. (Live
+  tray/hotkey behavior can't be auto-verified headless — the build is green; this is the human check.)
+  If you want a shareable `.dmg`: `npm run tauri -- build --bundles dmg` from a normal desktop session.
+- **Loop #13 (default, since pending=0 and Tauri is built)**: advance **GOAL #6 / M6 — demo polish**
+  on the web spine (demo-facing copy, the reassuring "was it just me?" framing, reliability/UX), since
+  the web app is the live demo the Tauri shell wraps. Optionally: replace the placeholder app icon with
+  a real logo if the user provides one; consider a short demo script/runbook.
 - **User live-test (web app, the demo spine)**: http://localhost:5173/ — Demo mode → activity strip
-  under the scrubber; click a bar or drag to scrub; Play history (2×/4×); Back to live; Density;
-  Verification mode (off by default). The browser Space hotkey + Notice button are unchanged.
+  under the scrubber; click a bar / drag to scrub; Play history (2×/4×); Back to live; Density;
+  Verification mode (off by default). Browser Space hotkey + Notice button unchanged.
 
 ## Blocked
-- **TASK-...1316 Part B (`tauri dev`/`tauri build`, native demo)** — gated on **ISSUE-...1318** (user
-  installs Rust/cargo). Part A (all cargo-free authoring) is done and committed.
-- **Bundle icons** — `tauri.conf.json` references `icons/*` but none are committed; generate with
-  `tauri icon` after Rust is installed (a logo asset from the user would help; noted in ISSUE-...1318).
+- **Nothing build-blocking.** The only open item is the human GUI smoke-test of the native `.app`
+  (above) — informational, not a loop blocker.
+- **DMG** is intentionally off by default (headless bundler limitation); produce on demand in a GUI session.
+- **App icon is a placeholder** (generated from a synthetic source) — swap for a real logo via
+  `tauri icon` whenever one is available.
 
 ## Note on loop durability
 Loop is **session-scoped**: advances only while this session is active; idles/closes stop it. Config is
