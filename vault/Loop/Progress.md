@@ -1,10 +1,11 @@
 # Progress
 
-_Last updated: 2026-06-13 17:1x (loop #19)_
+_Last updated: 2026-06-13 17:2x (loop #20)_
 
 ## Status
 **🚀 SUBMISSION IS LIVE: https://finejuly.github.io/Was-It-Just-Me/** — published, verified,
-demo-ready, and stable. **Loop #19 = STANDBY (no-op):** no new user feedback and no change
+demo-ready, and stable. **Loop #20:** added a judge-facing root `README.md` (the repo had none) —
+zero-risk docs, pushed; see [Run Log/loop-20](../Run%20Log/loop-20.md). **Loop #19 = STANDBY (no-op):** no new user feedback and no change
 clearly worth the risk to a finished, live submission, so product code was deliberately left
 untouched. This is the correct post-launch action.
 
