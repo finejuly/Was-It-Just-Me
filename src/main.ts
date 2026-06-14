@@ -10,6 +10,7 @@ import "leaflet/dist/leaflet.css";
 import { triggerSignal, generateScenario } from "./sim/simulator.ts";
 import {
   advancePlayback,
+  shouldAutoPlay,
   type PlaybackSpeed,
 } from "./sim/playback.ts";
 import { inWindow, timeBounds, windowCounts } from "./core/aggregate.ts";
@@ -491,6 +492,18 @@ setPlayLabel();
 playbackRow.hidden = !demoToggle.checked;
 mapView.setShowDensity(heatmapToggle.checked);
 loadDemo();
+// Auto-start the (already-built, already-tested) playback so a watch-only judge
+// who just opens the URL sees the story tell itself — quiet → signals arriving →
+// "it wasn't just you" — instead of a frozen snapshot. startPlayback() rewinds to
+// step 0 from the live tail, so this begins the lead-up from the start of history
+// and the existing loop-restart keeps it cycling. We respect prefers-reduced-
+// motion: a reduced-motion visitor keeps the static-but-fully-functional view and
+// can still press Play. No audio. Guard matchMedia for environments without it.
+const prefersReducedMotion =
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+if (shouldAutoPlay(demoToggle.checked, prefersReducedMotion)) {
+  startPlayback();
+}
 // No boot-time geolocation request: the demo neighborhood is the deliberate
 // default and the app is fully functional on it. Real location is opt-in via the
 // gesture-driven "Use my location" button (the gesture is what lets browsers

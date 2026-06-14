@@ -6,6 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   advancePlayback,
+  shouldAutoPlay,
   BASE_STEPS_PER_SECOND,
   PLAYBACK_SPEEDS,
   type PlaybackSpeed,
@@ -77,4 +78,17 @@ test("PLAYBACK_SPEEDS are positive multipliers and typed", () => {
     const speed: PlaybackSpeed = s;
     assert.ok(speed > 0);
   }
+});
+
+test("shouldAutoPlay: auto-plays when demo on and motion is allowed", () => {
+  assert.equal(shouldAutoPlay(true, false), true);
+});
+
+test("shouldAutoPlay: never auto-plays when demo is off", () => {
+  assert.equal(shouldAutoPlay(false, false), false);
+  assert.equal(shouldAutoPlay(false, true), false);
+});
+
+test("shouldAutoPlay: never forces motion when reduced motion is preferred", () => {
+  assert.equal(shouldAutoPlay(true, true), false);
 });

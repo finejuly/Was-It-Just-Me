@@ -70,3 +70,23 @@ export function advancePlayback(
   cur = Math.min(max, cur + wholeSteps);
   return { step: cur, reachedEnd: cur >= max, carryMs: carry };
 }
+
+/**
+ * Decide whether playback should auto-start on load.
+ *
+ * On boot the demo can narrate itself hands-free by auto-playing the seeded
+ * timeline — but only when Demo mode is on AND the visitor has not asked for
+ * reduced motion. Respecting `prefers-reduced-motion` means we never force
+ * animation: a reduced-motion visitor keeps the static-but-fully-functional
+ * view. Pure (two booleans in, one boolean out) so it stays DOM-free and
+ * unit-testable alongside advancePlayback.
+ *
+ * @param demoOn               true when Demo mode is enabled
+ * @param prefersReducedMotion true when the user prefers reduced motion
+ */
+export function shouldAutoPlay(
+  demoOn: boolean,
+  prefersReducedMotion: boolean,
+): boolean {
+  return demoOn && !prefersReducedMotion;
+}
