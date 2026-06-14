@@ -1,11 +1,13 @@
 # Progress
 
-_Last updated: 2026-06-13 17:2x (loop #20)_
+_Last updated: 2026-06-13 17:4x (loop #21)_
 
 ## Status
 **🚀 SUBMISSION IS LIVE: https://finejuly.github.io/Was-It-Just-Me/** — published, verified,
-demo-ready, and stable. **Loop #20:** added a judge-facing root `README.md` (the repo had none) —
-zero-risk docs, pushed; see [Run Log/loop-20](../Run%20Log/loop-20.md). **Loop #19 = STANDBY (no-op):** no new user feedback and no change
+demo-ready, and stable. **Loop #21:** the live demo now **auto-plays on load** (hands-free
+self-narration for a watch-only judge), respecting prefers-reduced-motion — commit `2032b7a`,
+tests 66→69, verified + pushed; see [Run Log/loop-21](../Run%20Log/loop-21.md). **Loop #20:**
+added a judge-facing root `README.md`. **Loop #19 = STANDBY (no-op):** no new user feedback and no change
 clearly worth the risk to a finished, live submission, so product code was deliberately left
 untouched. This is the correct post-launch action.
 
@@ -40,7 +42,7 @@ Prior loop (#18):
 - Reviews: **0 pending** (1–11 → processed/; no new Review 12)
 - PRD/GOAL: **in sync**
 - App: **LIVE** at https://finejuly.github.io/Was-It-Just-Me/ ; local dev http://localhost:5173/ ;
-  **tests 66/66**; deploy green (Node 24 + Pages workflow). Native `.app` launches + shows the map.
+  **tests 69/69**; deploy green (Node 24 + Pages workflow). Native `.app` launches + shows the map.
 - Issue gate: **0/10 — clear**. Config: refresh_minutes=1, unanswered_issue_limit=10.
 - Commits this loop: **none touching product code** (standby). Loop #19 close-out commit only
   (vault docs). Nothing pushed by the loop — push stays reserved for the orchestrator after verify.
